@@ -16,15 +16,20 @@ RUN powershell Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\D
 # Install Chocolately client and prerequisite packages.
 RUN powershell iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1')); \
     choco feature enable -n allowGlobalConfirmation; \
-    choco install microsoft-build-tools; \
-    choco install vcredist2010; \
-    choco install vcredist2013
+    choco install netfx-4.5.2-devpack; \
+    choco install microsoft-build-tools
+
+RUN powershell choco install vcredist2010; \
+    choco install vcredist2013;
 
 COPY content "c:/install/content"
 WORKDIR C:\\install\\content
 
 # Install NAV prerequisites and NAV default instance (will be stopped and disabled).
 RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-ReportBuilder.ps1; \
+    powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-SQLSysClrTypes.ps1; \
+    powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-SharedManagementObjects; \
+    powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-ReportViewer.ps1; \
     powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-ServiceTier.ps1 -SERVERINSTANCE "DynamicsNAV"
 
 # Expose the default NAV ports.
