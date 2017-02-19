@@ -3,7 +3,8 @@ This a simple and experimental Dockerfile for MS Dynamics NAV Server. Microsoft 
 The Dockerfile is trying to avoid them installing just a Service Tier and not the whole package.
 You can find more details on the [Tobias Fenster`s blog](http://navblog.infoma.de/index.php/2016/11/18/dynamics-nav-2017-in-a-windows-container-with-docker/).
 
-**Not working right now correctly - there are some problems when trying to build NAV object (*.cs to *.dll conversion fails).**
+~~**Not working right now correctly - there are some problems when trying to build NAV object (*.cs to *.dll conversion fails).**~~
+It looks like the last changes solved the problem.
 
 ## Prerequisites
 Before you can start the build process you have to upload unpacked content of NAV installation DVD (could be working with 2016 and 2017) into **DynamicsNavDvd** directory included in **content** directory.
