@@ -40,7 +40,7 @@ $certThumbprint = $crt.Thumbprint
 
 $instanceExist = $false
 $navInstance = Get-NAVServerInstance $SERVERINSTANCE
-if ($navInstance) {
+if ($navInstance -ne $null) {
     $instanceExist = $true
 } else {
     $instanceExist = $false
@@ -90,7 +90,7 @@ if ((!$instanceExist) -or ($RECONFIGUREEXISTINGINSTANCE)) {
 
 try {
     # Start NAV Service
-    Set-NAVServerInstance $SERVERINSTANCE -Start
+    Set-NAVServerInstance $SERVERINSTANCE -Restart
     Write-Verbose "Started NAV Server."
 
     # Create user if it is not there yet
