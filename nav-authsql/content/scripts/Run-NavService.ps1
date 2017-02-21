@@ -8,15 +8,19 @@ param(
     [Parameter(Mandatory=$true)]
     [String]$DBUSER,
     [Parameter(Mandatory=$true)]
-    [String]$DBUSERPWD
+    [String]$DBUSERPWD,
+    [Parameter(Mandatory=$true)]
+    [String]$NAVUSER,
+    [Parameter(Mandatory=$true)]
+    [String]$NAVUSERPWD,
+    [Parameter(Mandatory=$true)]
+    [String]$IMPORTCRONUSLIC
 )
 
 # Setup Environment
 $currDir = Split-Path $MyInvocation.MyCommand.Definition
 $crtLocation = 'cert:\LocalMachine\My'
 $verbosePreference = "Continue"
-$filesToCopy = @("Microsoft.IdentityModel.dll", "Microsoft.ReportViewer.Common.dll", "Microsoft.ReportViewer.DataVisualization.dll", "Microsoft.ReportViewer.ProcessingObjectModel.dll", `
-    "Microsoft.ReportViewer.WinForms.dll", "Microsoft.SqlServer.Types.dll")
 
 $navAdminToolFile = Get-ChildItem -Path $env:ProgramFiles -Filter NavAdminTool.ps1 -Recurse
 $navAdminToolFullName = $navAdminToolFile.FullName
@@ -48,18 +52,27 @@ Set-NAVServerConfiguration $SERVERINSTANCE -KeyName ClientServicesCredentialType
 # Certificate permssions
 & (Join-Path $currDir Add-UserToCertificate.ps1) -userName 'NT AUTHORITY\NETWORK SERVICE' -permission read -certStoreLocation $crtLocation -certThumbprint $certThumbprint
 
-# Copy Missing Files
-& (Join-Path $currDir Copy-ItemsTo.ps1) -ParentDirectory 'c:\install\content' -FileNames $filesToCopy -TargetDirectory $navServiceExeFileDir
-
 try {
     # Start NAV Service
     Set-NAVServerInstance $SERVERINSTANCE -Start
     Write-Verbose "Started NAV Server."
 
-    while ($true)
-    { 
-        Start-Sleep -Seconds 3600
+    # Create user if it is not there yet
+    if ((Get-NAVServerUser -ServerInstance $SERVERINSTANCE | Where-Object { $_.UserName -eq $NAVUSER}) -eq $null) { 
+        $password = ConvertTo-SecureString $NAVUSERPWD -AsPlainText -Force
+        New-NAVServerUser -UserName $NAVUSER -Password $password -ServerInstance $SERVERINSTANCE
+        New-NavServerUserPermissionSet -UserName $NAVUSER -ServerInstance $SERVERINSTANCE -PermissionSetId SUPER
     }
+
+    # Import Cronus license if requested
+    if ($IMPORTCRONUSLIC -eq 'true') {
+        Import-NAVServerLicense -LicenseFile 'C:\install\content\DynamicsNavDvd\SQLDemoDatabase\CommonAppData\Microsoft\Microsoft Dynamics NAV\100\Database\Cronus.flf' -Database NavDatabase -ServerInstance $SERVERINSTANCE
+    }
+
+    while ($true) 
+     {  
+         Start-Sleep -Seconds 3600 
+     } 
 }
 catch {
     Write-Host "NAV Server error: " $_.Exception.Message -ForegroundColor Red
