@@ -1,1 +1,1 @@
-navservice:2017.cu3
+navservice
