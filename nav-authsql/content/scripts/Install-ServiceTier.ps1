@@ -3,9 +3,14 @@ param(
     [String]$SERVERINSTANCE
 )
 
+$currDir = Split-Path $MyInvocation.MyCommand.Definition
 $process = 'msiexec.exe'
 $params = " SERVERINSTANCE=" + $SERVERINSTANCE
-$arguments = '/i "C:\\install\\content\\DynamicsNavDvd\\ServiceTier\\Microsoft Dynamics NAV Service.msi" /quiet /qn /norestart /log "C:\\install\\content\\LOG\\installnst.log"' + $params
+$arguments = '/i "C:\\install\\content\\DynamicsNavDvd\\ServiceTier\\Microsoft Dynamics NAV Service.msi" /quiet /qn /norestart /log "C:\install\content\LOG\installnst.log"' + $params
+
+# Copy Missing Files
+& (Join-Path $currDir Copy-ItemsTo.ps1) -ParentDirectory 'c:\install\content\ExtraDependencies' -TargetDirectory ($env:windir + '\System32')
+& (Join-Path $currDir Copy-ItemsTo.ps1) -ParentDirectory 'c:\install\content\DynamicsNavDvd\ServiceTier\System64Folder' -FileNames @("NavSip.dll") -TargetDirectory 'C:\Windows\SysWOW64'    
 
 $res = Start-Process -FilePath $process -ArgumentList $arguments -Wait -PassThru
 

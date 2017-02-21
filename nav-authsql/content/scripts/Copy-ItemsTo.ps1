@@ -1,11 +1,15 @@
 param(
     [Parameter(Mandatory=$true)]
     [String]$ParentDirectory,
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$false)]
     [string[]]$FileNames,
     [Parameter(Mandatory=$true)]
     [String]$TargetDirectory
 )
+
+if (!$FileNames) {
+    $FileNames = Get-ChildItem -Path $ParentDirectory -File
+}
 
 foreach ($fileName in $FileNames) {
 	try {

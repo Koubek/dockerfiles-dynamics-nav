@@ -8,19 +8,20 @@ param(
     [Parameter(Mandatory=$true)]
     [String]$DBUSER,
     [Parameter(Mandatory=$true)]
-    [String]$DBUSERPWD
+    [String]$DBUSERPWD,    
+    [Parameter(Mandatory=$true)]
+    [boolean]$RECONFIGUREEXISTINGINSTANCE=$false
 )
 
 # Setup Environment
 $currDir = Split-Path $MyInvocation.MyCommand.Definition
 $crtLocation = 'cert:\LocalMachine\My'
-$verbosePreference = "Continue"
-$filesToCopy = @("Microsoft.IdentityModel.dll", "Microsoft.ReportViewer.Common.dll", "Microsoft.ReportViewer.DataVisualization.dll", "Microsoft.ReportViewer.ProcessingObjectModel.dll", `
-    "Microsoft.ReportViewer.WinForms.dll", "Microsoft.SqlServer.Types.dll")
 
 $navAdminToolFile = Get-ChildItem -Path $env:ProgramFiles -Filter NavAdminTool.ps1 -Recurse
 $navAdminToolFullName = $navAdminToolFile.FullName
 & $navAdminToolFullName
+
+$verbosePreference = "Continue"
 
 $navServiceExeFile = Get-ChildItem -Path $env:ProgramFiles -Filter Microsoft.Dynamics.Nav.Server.exe -Recurse
 $navServiceExeFileDir = $navServiceExeFile.DirectoryName
@@ -31,25 +32,55 @@ $crt = Import-PfxCertificate c:\install\content\navcert.pfx $crtLocation
 $crtId = ($crtLocation + $crt.Thumbprint)
 $certThumbprint = $crt.Thumbprint
 
-# Create new instance (to be able give it custom name during the runtime).
-New-NAVServerInstance -ServerInstance $SERVERINSTANCE -DatabaseServer $DBSERVER -DatabaseName $DBNAME -ClientServicesCredentialType NavUserPassword `
-    -ManagementServicesPort 7045 -ClientServicesPort 7046 -SOAPServicesPort 7047 -ODataServicesPort 7048 `
-    -Verbose
+$instanceExist = $false
+$navInstance = Get-NAVServerInstance $SERVERINSTANCE
+if ($navInstance) {
+    $instanceExist = $true
+} else {
+    $instanceExist = $false
+}
 
-New-NAVEncryptionKey -KeyPath "c:\install\content\nav.key" -Password $password -Verbose
-Import-NAVEncryptionKey $SERVERINSTANCE -KeyPath "c:\install\content\nav.key" -Password $password -ApplicationDatabaseServer $DBSERVER `
-       -ApplicationDatabaseCredentials $cred -ApplicationDatabaseName $DBNAME -Force -Verbose
-Set-NAVServerConfiguration -DatabaseCredentials $cred -ServerInstance $SERVERINSTANCE -Force -Verbose
+if (!$instanceExist) {    
+    # Create new instance (to be able give it custom name during the runtime).
+    Write-Host "Adding new instance"
 
-Set-NAVServerConfiguration $SERVERINSTANCE -KeyName ServicesCertificateThumbprint -KeyValue $certThumbprint
-Set-NAVServerConfiguration $SERVERINSTANCE -KeyName ServicesCertificateValidationEnabled -KeyValue false
-Set-NAVServerConfiguration $SERVERINSTANCE -KeyName ClientServicesCredentialType -KeyValue NavUserPassword
+    $navInstance = New-NAVServerInstance -ServerInstance $SERVERINSTANCE -DatabaseServer $DBSERVER -DatabaseName $DBNAME -ClientServicesCredentialType NavUserPassword `
+        -ManagementServicesPort 7045 -ClientServicesPort 7046 -SOAPServicesPort 7047 -ODataServicesPort 7048 -Verbose
 
-# Certificate permssions
-& (Join-Path $currDir Add-UserToCertificate.ps1) -userName 'NT AUTHORITY\NETWORK SERVICE' -permission read -certStoreLocation $crtLocation -certThumbprint $certThumbprint
+    $navSvc = Get-Service $navInstance.ServerInstance
 
-# Copy Missing Files
-& (Join-Path $currDir Copy-ItemsTo.ps1) -ParentDirectory 'c:\install\content' -FileNames $filesToCopy -TargetDirectory $navServiceExeFileDir
+} else {
+    Write-Host "Instance" $SERVERINSTANCE "already exists"
+
+    $navSvc = Get-Service $navInstance.ServerInstance
+
+    if ($navSvc.StartType -eq 'Disabled') {
+        Write-Host "Changing StartType of the existing instance"
+        Set-Service $navSvc.Name -StartupType Automatic
+    }
+}
+
+if ((!$instanceExist) -or ($RECONFIGUREEXISTINGINSTANCE)) {
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName DatabaseServer -KeyValue $DBSERVER
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName DatabaseName -KeyValue $DBNAME
+
+    New-NAVEncryptionKey -KeyPath "c:\install\content\nav.key" -Password $password -Verbose
+    Import-NAVEncryptionKey $SERVERINSTANCE -KeyPath "c:\install\content\nav.key" -Password $password -ApplicationDatabaseServer $DBSERVER `
+        -ApplicationDatabaseCredentials $cred -ApplicationDatabaseName $DBNAME -Force -Verbose
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName EnableSqlConnectionEncryption -KeyValue true
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName TrustSQLServerCertificate -KeyValue true
+    Set-NAVServerConfiguration $SERVERINSTANCE -DatabaseCredentials $cred -Force -Verbose
+
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName ServicesCertificateThumbprint -KeyValue $certThumbprint
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName ServicesCertificateValidationEnabled -KeyValue false
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName ClientServicesCredentialType -KeyValue NavUserPassword
+
+    # Set-NAVServerConfiguration $SERVERINSTANCE -KeyName  -KeyValue 
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName CompileBusinessApplicationAtStartup -KeyValue false
+
+    # Certificate permssions
+    & (Join-Path $currDir Add-UserToCertificate.ps1) -userName 'NT AUTHORITY\NETWORK SERVICE' -permission read -certStoreLocation $crtLocation -certThumbprint $certThumbprint
+}
 
 try {
     # Start NAV Service
