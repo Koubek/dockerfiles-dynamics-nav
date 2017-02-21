@@ -8,8 +8,14 @@ param(
     [Parameter(Mandatory=$true)]
     [String]$DBUSER,
     [Parameter(Mandatory=$true)]
-    [String]$DBUSERPWD,    
+    [String]$DBUSERPWD,
     [Parameter(Mandatory=$true)]
+    [String]$NAVUSER,
+    [Parameter(Mandatory=$true)]
+    [String]$NAVUSERPWD,
+    [Parameter(Mandatory=$true)]
+    [String]$IMPORTCRONUSLIC,
+    [Parameter(Mandatory=$false)]
     [boolean]$RECONFIGUREEXISTINGINSTANCE=$false
 )
 
@@ -42,7 +48,7 @@ if ($navInstance) {
 
 if (!$instanceExist) {    
     # Create new instance (to be able give it custom name during the runtime).
-    Write-Host "Adding new instance"
+    Write-Verbose "Adding new instance"
 
     $navInstance = New-NAVServerInstance -ServerInstance $SERVERINSTANCE -DatabaseServer $DBSERVER -DatabaseName $DBNAME -ClientServicesCredentialType NavUserPassword `
         -ManagementServicesPort 7045 -ClientServicesPort 7046 -SOAPServicesPort 7047 -ODataServicesPort 7048 -Verbose
@@ -55,7 +61,7 @@ if (!$instanceExist) {
     $navSvc = Get-Service $navInstance.ServerInstance
 
     if ($navSvc.StartType -eq 'Disabled') {
-        Write-Host "Changing StartType of the existing instance"
+        Write-Verbose "Changing StartType of the existing instance"
         Set-Service $navSvc.Name -StartupType Automatic
     }
 }
@@ -87,10 +93,29 @@ try {
     Set-NAVServerInstance $SERVERINSTANCE -Start
     Write-Verbose "Started NAV Server."
 
-    while ($true)
-    { 
-        Start-Sleep -Seconds 3600
+    # Create user if it is not there yet
+    if ((Get-NAVServerUser -ServerInstance $SERVERINSTANCE | Where-Object { $_.UserName -eq $NAVUSER}) -eq $null) { 
+        Write-Verbose "Creating NAV user."
+        $password = ConvertTo-SecureString $NAVUSERPWD -AsPlainText -Force
+        New-NAVServerUser -UserName $NAVUSER -Password $password -ServerInstance $SERVERINSTANCE
+        New-NavServerUserPermissionSet -UserName $NAVUSER -ServerInstance $SERVERINSTANCE -PermissionSetId SUPER
     }
+
+    # Import Cronus license if requested
+    if ($IMPORTCRONUSLIC -eq 'true') {
+        Write-Verbose "Importing NAV license."
+        $cronusLicenseFile = Get-ChildItem -Path 'C:\install\content\DynamicsNavDvd\SQLDemoDatabase\' -Filter 'Cronus.flf' -Recurse | Select-Object -First 1
+        Import-NAVServerLicense -ServerInstance $SERVERINSTANCE -LicenseFile $cronusLicenseFile.FullName -Database NavDatabase
+    }
+
+    Get-NetIPAddress | Format-Table
+
+    Write-Verbose "NAV Server should be running..."
+
+    while ($true) 
+     {  
+         Start-Sleep -Seconds 3600 
+     } 
 }
 catch {
     Write-Host "NAV Server error: " $_.Exception.Message -ForegroundColor Red

@@ -9,6 +9,9 @@ ENV sql_server _
 ENV sql_db _
 ENV sql_user _
 ENV sql_pwd _
+ENV nav_user _
+ENV nav_user_pwd _
+ENV import_cronus_license false
 
 # Temporary workaround for Windows DNS client weirdness.
 RUN powershell Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters' -Name ServerPriorityTimeLimit -Value 0 -Type DWord
@@ -16,7 +19,6 @@ RUN powershell Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\D
 # Install Chocolately client and prerequisite packages.
 RUN powershell iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1')); \
     choco feature enable -n allowGlobalConfirmation; \
-    #choco install netfx-4.5.2-devpack; \
     choco install microsoft-build-tools
 
 RUN powershell choco install vcredist2010; \
@@ -42,4 +44,7 @@ CMD powershell c:\install\content\Scripts\Run-NavService.ps1 \
     -DBSERVER %sql_server% \
     -DBNAME %sql_db% \
     -DBUSER %sql_user% \
-    -DBUSERPWD %sql_pwd%
+    -DBUSERPWD %sql_pwd% \
+    -NAVUSER %nav_user% \
+    -NAVUSERPWD %nav_user_pwd% \
+    -IMPORTCRONUSLIC %import_cronus_license%
