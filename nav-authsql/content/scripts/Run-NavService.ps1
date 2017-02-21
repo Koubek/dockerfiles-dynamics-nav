@@ -14,17 +14,20 @@ param(
     [Parameter(Mandatory=$true)]
     [String]$NAVUSERPWD,
     [Parameter(Mandatory=$true)]
-    [String]$IMPORTCRONUSLIC
+    [String]$IMPORTCRONUSLIC,
+    [Parameter(Mandatory=$false)]
+    [boolean]$RECONFIGUREEXISTINGINSTANCE=$false
 )
 
 # Setup Environment
 $currDir = Split-Path $MyInvocation.MyCommand.Definition
 $crtLocation = 'cert:\LocalMachine\My'
-$verbosePreference = "Continue"
 
 $navAdminToolFile = Get-ChildItem -Path $env:ProgramFiles -Filter NavAdminTool.ps1 -Recurse
 $navAdminToolFullName = $navAdminToolFile.FullName
 & $navAdminToolFullName
+
+$verbosePreference = "Continue"
 
 $navServiceExeFile = Get-ChildItem -Path $env:ProgramFiles -Filter Microsoft.Dynamics.Nav.Server.exe -Recurse
 $navServiceExeFileDir = $navServiceExeFile.DirectoryName
@@ -35,22 +38,55 @@ $crt = Import-PfxCertificate c:\install\content\navcert.pfx $crtLocation
 $crtId = ($crtLocation + $crt.Thumbprint)
 $certThumbprint = $crt.Thumbprint
 
-# Create new instance (to be able give it custom name during the runtime).
-New-NAVServerInstance -ServerInstance $SERVERINSTANCE -DatabaseServer $DBSERVER -DatabaseName $DBNAME -ClientServicesCredentialType NavUserPassword `
-    -ManagementServicesPort 7045 -ClientServicesPort 7046 -SOAPServicesPort 7047 -ODataServicesPort 7048 `
-    -Verbose
+$instanceExist = $false
+$navInstance = Get-NAVServerInstance $SERVERINSTANCE
+if ($navInstance) {
+    $instanceExist = $true
+} else {
+    $instanceExist = $false
+}
 
-New-NAVEncryptionKey -KeyPath "c:\install\content\nav.key" -Password $password -Verbose
-Import-NAVEncryptionKey $SERVERINSTANCE -KeyPath "c:\install\content\nav.key" -Password $password -ApplicationDatabaseServer $DBSERVER `
-       -ApplicationDatabaseCredentials $cred -ApplicationDatabaseName $DBNAME -Force -Verbose
-Set-NAVServerConfiguration -DatabaseCredentials $cred -ServerInstance $SERVERINSTANCE -Force -Verbose
+if (!$instanceExist) {    
+    # Create new instance (to be able give it custom name during the runtime).
+    Write-Verbose "Adding new instance"
 
-Set-NAVServerConfiguration $SERVERINSTANCE -KeyName ServicesCertificateThumbprint -KeyValue $certThumbprint
-Set-NAVServerConfiguration $SERVERINSTANCE -KeyName ServicesCertificateValidationEnabled -KeyValue false
-Set-NAVServerConfiguration $SERVERINSTANCE -KeyName ClientServicesCredentialType -KeyValue NavUserPassword
+    $navInstance = New-NAVServerInstance -ServerInstance $SERVERINSTANCE -DatabaseServer $DBSERVER -DatabaseName $DBNAME -ClientServicesCredentialType NavUserPassword `
+        -ManagementServicesPort 7045 -ClientServicesPort 7046 -SOAPServicesPort 7047 -ODataServicesPort 7048 -Verbose
 
-# Certificate permssions
-& (Join-Path $currDir Add-UserToCertificate.ps1) -userName 'NT AUTHORITY\NETWORK SERVICE' -permission read -certStoreLocation $crtLocation -certThumbprint $certThumbprint
+    $navSvc = Get-Service $navInstance.ServerInstance
+
+} else {
+    Write-Host "Instance" $SERVERINSTANCE "already exists"
+
+    $navSvc = Get-Service $navInstance.ServerInstance
+
+    if ($navSvc.StartType -eq 'Disabled') {
+        Write-Verbose "Changing StartType of the existing instance"
+        Set-Service $navSvc.Name -StartupType Automatic
+    }
+}
+
+if ((!$instanceExist) -or ($RECONFIGUREEXISTINGINSTANCE)) {
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName DatabaseServer -KeyValue $DBSERVER
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName DatabaseName -KeyValue $DBNAME
+
+    New-NAVEncryptionKey -KeyPath "c:\install\content\nav.key" -Password $password -Verbose
+    Import-NAVEncryptionKey $SERVERINSTANCE -KeyPath "c:\install\content\nav.key" -Password $password -ApplicationDatabaseServer $DBSERVER `
+        -ApplicationDatabaseCredentials $cred -ApplicationDatabaseName $DBNAME -Force -Verbose
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName EnableSqlConnectionEncryption -KeyValue true
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName TrustSQLServerCertificate -KeyValue true
+    Set-NAVServerConfiguration $SERVERINSTANCE -DatabaseCredentials $cred -Force -Verbose
+
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName ServicesCertificateThumbprint -KeyValue $certThumbprint
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName ServicesCertificateValidationEnabled -KeyValue false
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName ClientServicesCredentialType -KeyValue NavUserPassword
+
+    # Set-NAVServerConfiguration $SERVERINSTANCE -KeyName  -KeyValue 
+    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName CompileBusinessApplicationAtStartup -KeyValue false
+
+    # Certificate permssions
+    & (Join-Path $currDir Add-UserToCertificate.ps1) -userName 'NT AUTHORITY\NETWORK SERVICE' -permission read -certStoreLocation $crtLocation -certThumbprint $certThumbprint
+}
 
 try {
     # Start NAV Service
@@ -59,6 +95,7 @@ try {
 
     # Create user if it is not there yet
     if ((Get-NAVServerUser -ServerInstance $SERVERINSTANCE | Where-Object { $_.UserName -eq $NAVUSER}) -eq $null) { 
+        Write-Verbose "Creating NAV user."
         $password = ConvertTo-SecureString $NAVUSERPWD -AsPlainText -Force
         New-NAVServerUser -UserName $NAVUSER -Password $password -ServerInstance $SERVERINSTANCE
         New-NavServerUserPermissionSet -UserName $NAVUSER -ServerInstance $SERVERINSTANCE -PermissionSetId SUPER
@@ -66,8 +103,14 @@ try {
 
     # Import Cronus license if requested
     if ($IMPORTCRONUSLIC -eq 'true') {
-        Import-NAVServerLicense -LicenseFile 'C:\install\content\DynamicsNavDvd\SQLDemoDatabase\CommonAppData\Microsoft\Microsoft Dynamics NAV\100\Database\Cronus.flf' -Database NavDatabase -ServerInstance $SERVERINSTANCE
+        Write-Verbose "Importing NAV license."
+        $cronusLicenseFile = Get-ChildItem -Path 'C:\install\content\DynamicsNavDvd\SQLDemoDatabase\' -Filter 'Cronus.flf' -Recurse | Select-Object -First 1
+        Import-NAVServerLicense -ServerInstance $SERVERINSTANCE -LicenseFile $cronusLicenseFile.FullName -Database NavDatabase
     }
+
+    Get-NetIPAddress | Format-Table
+
+    Write-Verbose "NAV Server should be running..."
 
     while ($true) 
      {  

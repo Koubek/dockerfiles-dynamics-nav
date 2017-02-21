@@ -4,7 +4,7 @@ MAINTAINER Jakub Vanak
 
 ENV chocolateyUseWindowsCompression false
 # Docker run variables to create and configure new instance.
-ENV nav_instance "NAVSERVICE"
+ENV nav_instance "DynamicsNAV"
 ENV sql_server _
 ENV sql_db _
 ENV sql_user _
@@ -19,7 +19,6 @@ RUN powershell Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\D
 # Install Chocolately client and prerequisite packages.
 RUN powershell iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1')); \
     choco feature enable -n allowGlobalConfirmation; \
-    choco install netfx-4.5.2-devpack; \
     choco install microsoft-build-tools
 
 RUN powershell choco install vcredist2010; \
@@ -29,11 +28,13 @@ COPY content "c:/install/content"
 WORKDIR C:\\install\\content
 
 # Install NAV prerequisites and NAV default instance (will be stopped and disabled).
-RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-ReportBuilder.ps1; \
-    powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-SQLSysClrTypes.ps1; \
-    powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-SharedManagementObjects; \
-    powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-ReportViewer.ps1; \
-    powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-ServiceTier.ps1 -SERVERINSTANCE "DynamicsNAV"
+RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-Msi.ps1 'C:\install\content\DynamicsNavDvd\Prerequisite Components\Microsoft Report Viewer\SQLSysClrTypes.msi'
+RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-Msi.ps1 'C:\install\content\DynamicsNavDvd\Prerequisite Components\Microsoft SQL Server Management Objects\SQLSysClrTypes.msi'
+RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-Msi.ps1 'C:\install\content\DynamicsNavDvd\Prerequisite Components\Microsoft SQL Server Management Objects\SharedManagementObjects.msi'
+RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-Msi.ps1 'C:\install\content\DynamicsNavDvd\Prerequisite Components\Microsoft Report Viewer\ReportViewer.msi'
+RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-Msi.ps1 'C:\install\content\DynamicsNavDvd\Prerequisite Components\Microsoft SQL Server\ReportBuilder3.msi'
+RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-Msi.ps1 'C:\install\content\DynamicsNavDvd\Prerequisite Components\Microsoft SQL Server\sqlncli64.msi'
+RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-ServiceTier.ps1 -SERVERINSTANCE "DynamicsNAV"
 
 # Expose the default NAV ports.
 EXPOSE 7045 7046 7047 7048
