@@ -20,12 +20,13 @@ while ($res.HasExited -eq $false) {
     Start-Sleep -s 1
 }
 
+$exitCode = $res.ExitCode
+
 # Change service startup type to Disabled (we don`t want to run main and unconfigured default instance) and stop it.
+Write-Host "Trying stop and disable the default instance. Please, be patient, this may take a while." -ForegroundColor Green
 $navSvc = Get-Service '*MicrosoftDynamicsNavServer*' 
 Set-Service $navSvc.Name -StartupType Disabled
 Stop-Service $navSvc.Name
 
-# Copy missing dlls
-& (Join-Path $currDir Copy-ItemsTo.ps1) -ParentDirectory 'c:\install\content\ExtraDependencies' -FileNames $filesToCopy -TargetDirectory "c:\windows\system32"
-
-$exitCode = $res.ExitCode
+# Install languages
+& (Join-Path $currDir Install-Languages.ps1)
