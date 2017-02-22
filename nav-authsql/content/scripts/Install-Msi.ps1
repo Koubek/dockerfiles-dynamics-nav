@@ -14,4 +14,6 @@ while ($res.HasExited -eq $false) {
     Start-Sleep -s 1
 }
 
+Write-Host "EXIT CODE:" $res.ExitCode
+
 $exitCode = $res.ExitCode
