@@ -6,7 +6,7 @@ Thanks again to Tobias as he was very helpful and made it possible to run NAV co
 
 ## Prerequisites
 Before you can start the build process you have to upload unpacked content of NAV installation DVD (could be working with 2016 and 2017) into **DynamicsNavDvd** directory included in **content** directory.
-Without this content, you can\`t build the image as it depends on DVD content.
+Without this content, you can\`t build the image as it depends on DVD content. If you are using DVD including a language layer, this layer will be detected and installed automatically as well now.
 
 Also, as this is a solution based on SQL authentication, you need a SQL server login and provide those credentials during the *docker run* process.
 
@@ -49,10 +49,10 @@ Next, you can find there are several *bat* files. Those files consume the inform
     * *sql_user* - name of the SQL user you are going to use to establish the connection between NAV service and SQL server.
     SQL login must already be present on SQL server and must have required permissions.
     * *sql_pwd* - password of the SQL user.
-    *!!! PLEASE, BE AWARE THAT **ENV** PARAMETERS CAN BE REVEALED USING DOCKER INSPECT AND FOR THIS REASONS THIS IS A SECURITY ISSUE WE WILL TRY TO SOLVE TO IN THE FUTURE !!!*
+    *!!! PLEASE, BE AWARE THAT* **ENV** *PARAMETERS CAN BE REVEALED USING DOCKER INSPECT AND FOR THIS REASONS THIS IS A SECURITY ISSUE WE WILL TRY TO SOLVE TO IN THE FUTURE !!!*
     * *nav_user* - name of the NAV user (will be created when doesn`t exist).
-    * *nav_user_pwd* - password of the NAV user.
-    *!!! PLEASE, BE AWARE THAT **ENV** PARAMETERS CAN BE REVEALED USING DOCKER INSPECT AND FOR THIS REASONS THIS IS A SECURITY ISSUE WE WILL TRY TO SOLVE TO IN THE FUTURE !!!*
+    * *nav_user_pwd* - password of the NAV user. 
+    *!!! PLEASE, BE AWARE THAT* **ENV** *PARAMETERS CAN BE REVEALED USING DOCKER INSPECT AND FOR THIS REASONS THIS IS A SECURITY ISSUE WE WILL TRY TO SOLVE TO IN THE FUTURE !!!*
     * *import_cronus_license* - true/false - if true, the Cronus license will be imported from the installation DVD.
     * *config_instance* - true/false - if the specified instance already exists (e.g. DynamicsNAV) you can change the behaviour of the startup script to reconfigure or don`t the existing instance.
 
