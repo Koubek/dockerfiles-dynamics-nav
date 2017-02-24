@@ -12,7 +12,7 @@ ENV sql_pwd _
 ENV nav_user _
 ENV nav_user_pwd _
 ENV import_cronus_license false
-ENV config_instance $False
+ENV config_instance false
 
 # Temporary workaround for Windows DNS client weirdness.
 RUN powershell Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters' -Name ServerPriorityTimeLimit -Value 0 -Type DWord

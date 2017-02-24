@@ -16,7 +16,7 @@ param(
     [Parameter(Mandatory=$true)]
     [String]$IMPORTCRONUSLIC,
     [Parameter(Mandatory=$false)]
-    [boolean]$RECONFIGUREEXISTINGINSTANCE=$false
+    [String]$RECONFIGUREEXISTINGINSTANCE
 )
 
 # Setup Environment
@@ -66,7 +66,7 @@ if (!$instanceExist) {
     }
 }
 
-if ((!$instanceExist) -or ($RECONFIGUREEXISTINGINSTANCE)) {
+if ((!$instanceExist) -or ($RECONFIGUREEXISTINGINSTANCE -eq 'true')) {
     Set-NAVServerConfiguration $SERVERINSTANCE -KeyName DatabaseServer -KeyValue $DBSERVER
     Set-NAVServerConfiguration $SERVERINSTANCE -KeyName DatabaseName -KeyValue $DBNAME
 
