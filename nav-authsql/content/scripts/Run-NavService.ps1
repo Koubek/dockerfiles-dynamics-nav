@@ -25,8 +25,9 @@ $crtLocation = 'cert:\LocalMachine\My'
 
 $navAdminToolFile = Get-ChildItem -Path $env:ProgramFiles -Filter NavAdminTool.ps1 -Recurse
 $navAdminToolFullName = $navAdminToolFile.FullName
-& $navAdminToolFullName
 
+$verbosePreference = "SilentlyContinue"
+& $navAdminToolFullName
 $verbosePreference = "Continue"
 
 $navServiceExeFile = Get-ChildItem -Path $env:ProgramFiles -Filter Microsoft.Dynamics.Nav.Server.exe -Recurse
