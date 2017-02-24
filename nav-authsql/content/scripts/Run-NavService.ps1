@@ -16,7 +16,7 @@ param(
     [Parameter(Mandatory=$true)]
     [String]$IMPORTCRONUSLIC,
     [Parameter(Mandatory=$false)]
-    [boolean]$RECONFIGUREEXISTINGINSTANCE=$false
+    [String]$RECONFIGUREEXISTINGINSTANCE
 )
 
 # Setup Environment
@@ -25,8 +25,9 @@ $crtLocation = 'cert:\LocalMachine\My'
 
 $navAdminToolFile = Get-ChildItem -Path $env:ProgramFiles -Filter NavAdminTool.ps1 -Recurse
 $navAdminToolFullName = $navAdminToolFile.FullName
-& $navAdminToolFullName
 
+$verbosePreference = "SilentlyContinue"
+& $navAdminToolFullName
 $verbosePreference = "Continue"
 
 $navServiceExeFile = Get-ChildItem -Path $env:ProgramFiles -Filter Microsoft.Dynamics.Nav.Server.exe -Recurse
@@ -66,7 +67,7 @@ if (!$instanceExist) {
     }
 }
 
-if ((!$instanceExist) -or ($RECONFIGUREEXISTINGINSTANCE)) {
+if ((!$instanceExist) -or ($RECONFIGUREEXISTINGINSTANCE -eq 'true')) {
     Set-NAVServerConfiguration $SERVERINSTANCE -KeyName DatabaseServer -KeyValue $DBSERVER
     Set-NAVServerConfiguration $SERVERINSTANCE -KeyName DatabaseName -KeyValue $DBNAME
 

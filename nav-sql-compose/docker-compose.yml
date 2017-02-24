@@ -1,0 +1,41 @@
+version: '2.1'
+services:
+    sql:
+        image: microsoft/mssql-server-windows:latest
+        volumes: 
+            - .\SQL\DB:C:\SQLDBs
+        environment:
+            sa_password: "Password1"
+            attach_dbs: "[{'dbName':'NAVDB','dbFiles':['C:\\\\SQLDBs\\\\NAVDB_Data.mdf','C:\\\\SQLDBs\\\\NAVDB_Log.ldf']}]"
+            ACCEPT_EULA: "Y" 
+            DATABASENAME: "NAVDB"
+        ports:
+            - "1433:1433" # for debug. Remove this for production
+        networks:
+            default:
+                aliases:
+                    - sql
+    nav:
+        image: myprivaterepo/navservice:10.0.15140.0   # this image must be available/build it before!
+        environment:
+            nav_instance: "NAVSERVICE"
+            sql_server: "sql"
+            sql_db: "NAVDB"
+            sql_user: "sa"
+            sql_pwd: "Password1"
+            nav_user: "MYNAVUSER"
+            nav_user_pwd: "MyNavUserPwd1@"
+            import_cronus_license: "true"
+            config_instance: "false"
+        depends_on:
+            - "sql"
+        ports:
+            - "7045-7048:7045-7048"
+        networks:
+            default:
+                aliases:
+                    - nav
+networks:
+  default:
+    external:
+      name: nat
