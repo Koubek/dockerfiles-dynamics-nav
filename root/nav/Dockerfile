@@ -23,7 +23,7 @@ RUN powershell iex ((new-object net.webclient).DownloadString('https://chocolate
     choco install microsoft-build-tools
 
 RUN powershell choco install vcredist2010; \
-    choco install vcredist2013;
+    powershell choco install vcredist2013;
 
 COPY content "c:/install/content"
 WORKDIR C:\\install\\content
@@ -36,7 +36,7 @@ RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-
 # Expose the default NAV ports.
 EXPOSE 7045 7046 7047 7048
 
-CMD powershell c:\install\content\Scripts\Run-NavService.ps1 \
+CMD powershell c:\install\content\Scripts\Run-NavService-Sql.ps1 \
     -SERVERINSTANCE %nav_instance% \
     -DBSERVER %sql_server% \
     -DBNAME %sql_db% \
