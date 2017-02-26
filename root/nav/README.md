@@ -1,22 +1,24 @@
-# Dockefile for MS Dynamics NAV with SQL Authentication
-This a simple and experimental Dockerfile for MS Dynamics NAV Server. Microsoft doesn\`t provide an official support for NAV containerization because of several OS dependencies. 
-The Dockerfile is trying to avoid them installing just a Service Tier and not the whole package.
-You can find more details on the [Tobias Fenster`s blog](http://navblog.infoma.de/index.php/2016/11/18/dynamics-nav-2017-in-a-windows-container-with-docker/). 
-Thanks again to Tobias as he was very helpful and made it possible to run NAV container correctly.
+# Dockefile for MS Dynamics NAV
+Microsoft doesn\`t provide an official support for NAV containerization because of several reasons I suppo. 
+My opinion is that the most important reason could be a several OS dependencies that don\`t let install NAV on Windows Server Core (one of the base OS layers for Windows containers).
+
+You can consider this Dockerfile as the most elemental one providing MS Dynamics NAV Server Docker image definition you can instantiate indepentently or can be consumed from **nav-sql-compose**.
+
+The Dockerfile installs just a NAV service (*Microsoft Dynamics NAV Service.msi*) to avoid the prerequisites checks when installing from the main installer (*setup.exe* in the NAV DVD root).
 
 ## Prerequisites
-Before you can start the build process you have to upload unpacked content of NAV installation DVD (could be working with 2016 and 2017) into **DynamicsNavDvd** directory included in **content** directory.
-Without this content, you can\`t build the image as it depends on DVD content. If you are using DVD including a language layer, this layer will be detected and installed automatically as well now.
-
-Also, as this is a solution based on SQL authentication, you need a SQL server login and provide those credentials during the *docker run* process.
+Before you can start the build process you have to upload unpacked content of NAV installation DVD into **root\\__content\\NAV\\DynamicsNavDvd** directory.
+Without this content, you can\`t build the image as it depends on DVD content itselfs. 
+If you are using DVD including a language layer, this layer will be detected and installed automatically as well.
 
 ## Getting started
-This simple and maybe not very well made solution has several files that help me to simplify build process and container management process.
-You can find two basic configuration files in the main directories:
-* **__imagename.txt** - specify name of the image (in this directory),
-* **..\\__privatereponame.txt** - is useful when working with private Docker repository. In here I use a slightly different way I use in the production environment (this information is being distributed using GPOs of AD). Anyway, you can keep whatever there until you will try to push the image to your real private repository (right now in the parent directory to be able to group all required folders/solutions).
+You can find several files that can be quite helpfull and could simplify whole Docker image and Docker container management process.
+You can use **__imagename.txt** file to specify name of the image.
 
-Next, you can find there are several *bat* files. Those files consume the information from the previously configured files and build, run and clean images/containers. You can see all details in the **_run.detached.bat** file which is supposed to be the best way how to run the container.
+Next, you can see couple of *bat* files in here. 
+These files consume the information from the previously configured files and build, run and clean images/containers. 
+You can see all details in the **_run.detached.bat** file which is supposed to be the best way how to run the container. 
+Of course, you can go even more further, you can run your container and set for example restart policies, memory limitation etc.
 
 ## Build, push and run (aka DOCKER`s motto BUILD, SHIP, RUN)
 * ### Build your own image / an image based on a NAV version
@@ -28,8 +30,10 @@ Next, you can find there are several *bat* files. Those files consume the inform
 
 * ### Push your image into docker registry
     This step is not really necessary to be able to instantiate later new containers based on the image. 
-    But of course, in a real environment, you want to distribute those image you have created. So this is the way how to do it and distribute the images to the audience... 
+    But of course, in a real environment, you want to distribute the image you have created. 
+    So this is the way how to do it and distribute the images to the audience... 
     Your colleagues don`t have to repeat the build process on their own machines. They will just reuse what you have already done.
+    When using private registry you should also configure (probably add) **insecure-registries** parameter in your **C:\ProgramData\docker\config\daemon.json**.
 
     To push the image use the following file:
     ```
@@ -56,35 +60,46 @@ Next, you can find there are several *bat* files. Those files consume the inform
     * *import_cronus_license* - true/false - if true, the Cronus license will be imported from the installation DVD.
     * *config_instance* - true/false - if the specified instance already exists (e.g. DynamicsNAV) you can change the behaviour of the startup script to reconfigure or don`t the existing instance.
 
-    You can see some of the parameters in the *_***.bat* scripts but let`s see some examples here:
+    You can see some of the parameters in the *_***.bat* scripts but let`s see some examples here:    
+    * This is the most trivial docker run. As you can see we are going to run the container in the detached mode.
+    Detached mode is ideal for a regular use (long time runs).
     ```docker
-    # This is the most trivial docker run. As you can see we are going to run the container in the detached mode.
-    # Detached mode is ideal for a regular use (long time runs).
     docker run -d --hostname=NAVSERVER -e "sql_server=sql_ip\sql_instance" -e "sql_db=navdbname" -e "sql_user=user" -e "sql_pwd=pwd" -e "nav_user=navuser" -e "nav_user_pwd=pwd" my-nav-image
+    ```
 
-    # If you have any problems to make a connection from NAV against the container you can add port mapping which will also expose the internal ports.
-    # In this case, we map the port 1:1 but you can also map the private ports to different public ports.
-    # In my case I don`t need it, everything works as supposed even without the port mapping as Dockerfile includes EXPOSE instruction for these ports.
-    # But tfenster had problems on Azure to access the container without these mappings.
+    * If you have any problems to make a connection from NAV against the container you can add port mapping which will also expose the internal ports.
+    In this case, we map the port 1:1 but you can also map the private ports to different public ports.
+    In my case I don`t need it, everything works as supposed even without the port mapping as Dockerfile includes EXPOSE instruction for these ports.
+    But tfenster had problems on Azure to access the container without these mappings.
+    ```docker
     docker run -d -p 7045-7048:7045-7048 --hostname=NAVSERVER -e "sql_server=sql_ip\sql_instance" -e "sql_db=navdbname" -e "sql_user=user" -e "sql_pwd=pwd" -e "nav_user=navuser" -e "nav_user_pwd=pwd" my-nav-image
+    ```
 
-    # You can also specify the name of the created container. It is simple, just use --name parameter.
-    # This could be helpful when referencing the container later in some scripts.
+    * You can also specify the name of the created container. It is simple, just use --name parameter.
+    This could be helpful when referencing the container later in some scripts.
+    ```docker
     docker run -d --name=my_new_container --hostname=NAVSERVER -e "sql_server=sql_ip\sql_instance" -e "sql_db=navdbname" -e "sql_user=user" -e "sql_pwd=pwd" -e "nav_user=navuser" -e "nav_user_pwd=pwd" my-nav-image
+    ```
 
-    # You can also run the container in the interactive mode. You would use it especially during the tests and debugging.
-    # Just add -ti parameters instead of -d parameter. 
-    # Specially useful for testing and debugging - you can also add --rm, this will remove the container when existted. You don`t need to delete it later.
+    * You can also run the container in the interactive mode. You would use it especially during the tests and debugging.
+    Just add -ti parameters instead of -d parameter. 
+    Specially useful for testing and debugging - you can also add --rm, this will remove the container when existted. You don`t need to delete it later.
+    ```docker
     docker run -ti --rm --hostname=NAVSERVER -e "sql_server=sql_ip\sql_instance" -e "sql_db=navdbname" -e "sql_user=user" -e "sql_pwd=pwd" -e "nav_user=navuser" -e "nav_user_pwd=pwd" my-nav-image
+    ```
 
-    # And for purposes of the pure debugging you can use the following example which will just create the container based on the image.
-    # It will also override the startup script - in this case just powershell will be executed and you can run whatever you want inside the container.
-    # You can also see the volume mapping. In this way you can optimize scripts outside the container and those will be able in c:\scripts inside
-    # of the container. Then you can execute those scripts. In the same way you can also redirect outputs from the container.
+    * And for purposes of the pure debugging you can use the following example which will just create the container based on the image.
+    It will also override the startup script - in this case just powershell will be executed and you can run whatever you want inside the container.
+    You can also see the volume mapping. In this way you can optimize scripts outside the container and those will be able in c:\scripts inside
+    of the container. Then you can execute those scripts. In the same way you can also redirect outputs from the container.
+    ```docker
     docker run -ti --rm --hostname=NAVSERVER -v %cd%\content\scripts:c:\scripts my-nav-image powershell
     ```
 
-    I would strongly recommend reading at least something about [docker run](https://docs.docker.com/engine/reference/run/) and [docker build](https://docs.docker.com/engine/reference/commandline/build/) to understand the basics of the technology.
-    If you are interested even more you can see also something about [dockerfiles](https://docs.docker.com/engine/reference/builder/).
 
-    As we are working on the windows platform you should also [Windows Containers on MSDN](https://docs.microsoft.com/virtualization/windowscontainers/about/).
+## Resources: Docker and Windows containers
+
+I would strongly recommend reading at least something about [docker run](https://docs.docker.com/engine/reference/run/) and [docker build](https://docs.docker.com/engine/reference/commandline/build/) to understand the basics of the technology.
+If you are interested even more you can see also something about [dockerfiles](https://docs.docker.com/engine/reference/builder/).
+
+As we are working on the windows platform you should also [Windows Containers on MSDN](https://docs.microsoft.com/virtualization/windowscontainers/about/).

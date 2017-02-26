@@ -6,8 +6,7 @@ services:
         environment:
             sa_password: "Password1"
             attach_dbs: "[{'dbName':'NAVDB','dbFiles':['C:\\\\SQLDBs\\\\NAVDB_Data.mdf','C:\\\\SQLDBs\\\\NAVDB_Log.ldf']}]"
-            ACCEPT_EULA: "Y" 
-            DATABASENAME: "NAVDB"
+            ACCEPT_EULA: "Y"
         ports:
             - "1433:1433" # for debug. Remove this for production
     nav:
