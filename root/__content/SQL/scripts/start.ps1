@@ -66,9 +66,24 @@ if (($restore_dbs -ne $null) -and ($restore_dbs -ne "")) {
 
 	if ($null -ne $rdbs -And $rdbs.Length -gt 0){
 		Write-Verbose "Restoring $($rdbs.Length) database(s)"
+
+		# create folders in share with hostname which is the container id
+		$base_db_folder = ("c:\SQLDBS\" + $env:computername)
+		$log_db_folder = ($base_db_folder + "\Logs")
+		$data_db_folder = ($base_db_folder + "\Data")
+		mkdir $base_db_folder
+		mkdir $log_db_folder
+		mkdir $data_db_folder
+
+		# set default folders
+		Set-ItemProperty -Path 'HKLM:\Software\Microsoft\MSSQLServer\MSSQLServer' -Name DefaultData -Value $data_db_folder -Type String
+		Set-ItemProperty -Path 'HKLM:\Software\Microsoft\MSSQLServer\MSSQLServer' -Name DefaultLog -Value $log_db_folder -Type String
+		Restart-Service -Force MSSQLSERVER
+
+		# restore databases
 		Foreach($rdb in $rdbs)
 		{
-			Restore-SqlDatabase -ServerInstance "localhost" -Database $rdb.dnName -BackupFile $rdb.bckFile	# have to solve destination path to restore the db on a shared volume
+			Restore-SqlDatabase -ServerInstance "localhost" -Database $rdb.dbName -BackupFile $rdb.bckFile	
 		}
 	}
 }
