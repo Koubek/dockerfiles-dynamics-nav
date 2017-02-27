@@ -1,0 +1,21 @@
+version: '2.1'
+services:
+    sql:
+        image: microsoft/mssql-server-windows:latest
+        networks:
+            default:
+                aliases:
+                    - sql
+    nav:
+        depends_on:
+            - "sql"
+        ports:
+            - "7045-7048:7045-7048"
+        networks:
+            default:
+                aliases:
+                    - nav
+networks:
+  default:
+    external:
+      name: nat

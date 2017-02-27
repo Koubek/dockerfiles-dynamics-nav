@@ -1,0 +1,22 @@
+version: '2.1'
+services:
+    sql:
+        volumes: 
+            - .\SQL\DB:C:\SQLDBs
+        environment:
+            sa_password: "Password1"
+            attach_dbs: "[{'dbName':'NAVDB','dbFiles':['C:\\\\SQLDBs\\\\NAVDB_Data.mdf','C:\\\\SQLDBs\\\\NAVDB_Log.ldf']}]"
+            ACCEPT_EULA: "Y"
+        ports:
+            - "1433:1433" # for debug. Remove this for production
+    nav:
+        environment:
+            nav_instance: "NAVSERVICE"
+            sql_server: "sql"
+            sql_db: "NAVDB"
+            sql_user: "sa"
+            sql_pwd: "Password1"
+            nav_user: "MYNAVUSER"
+            nav_user_pwd: "MyNavUserPwd1@"
+            import_cronus_license: "true"
+            config_instance: "false"

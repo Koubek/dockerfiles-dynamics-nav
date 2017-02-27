@@ -12,7 +12,7 @@ ENV sql_pwd _
 ENV nav_user _
 ENV nav_user_pwd _
 ENV import_cronus_license false
-ENV config_instance $False
+ENV config_instance false
 
 # Temporary workaround for Windows DNS client weirdness.
 RUN powershell Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters' -Name ServerPriorityTimeLimit -Value 0 -Type DWord
@@ -23,24 +23,20 @@ RUN powershell iex ((new-object net.webclient).DownloadString('https://chocolate
     choco install microsoft-build-tools
 
 RUN powershell choco install vcredist2010; \
-    choco install vcredist2013;
+    powershell choco install vcredist2013;
 
 COPY content "c:/install/content"
 WORKDIR C:\\install\\content
 
 # Install NAV prerequisites and NAV default instance (will be stopped and disabled).
-RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-Msi.ps1 'C:\install\content\DynamicsNavDvd\Prerequisite Components\Microsoft Report Viewer\SQLSysClrTypes.msi'
 RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-Msi.ps1 'C:\install\content\DynamicsNavDvd\Prerequisite Components\Microsoft SQL Server Management Objects\SQLSysClrTypes.msi'
 RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-Msi.ps1 'C:\install\content\DynamicsNavDvd\Prerequisite Components\Microsoft SQL Server Management Objects\SharedManagementObjects.msi'
-RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-Msi.ps1 'C:\install\content\DynamicsNavDvd\Prerequisite Components\Microsoft Report Viewer\ReportViewer.msi'
-RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-Msi.ps1 'C:\install\content\DynamicsNavDvd\Prerequisite Components\Microsoft SQL Server\ReportBuilder3.msi'
-RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-Msi.ps1 'C:\install\content\DynamicsNavDvd\Prerequisite Components\Microsoft SQL Server\sqlncli64.msi'
 RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-ServiceTier.ps1 -SERVERINSTANCE "DynamicsNAV"
 
 # Expose the default NAV ports.
 EXPOSE 7045 7046 7047 7048
 
-CMD powershell c:\install\content\Scripts\Run-NavService.ps1 \
+CMD powershell c:\install\content\Scripts\Run-NavService-Sql.ps1 \
     -SERVERINSTANCE %nav_instance% \
     -DBSERVER %sql_server% \
     -DBNAME %sql_db% \
