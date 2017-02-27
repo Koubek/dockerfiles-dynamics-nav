@@ -78,6 +78,7 @@ if (($restore_dbs -ne $null) -and ($restore_dbs -ne "")) {
 		# set default folders
 		Set-ItemProperty -Path 'HKLM:\Software\Microsoft\MSSQLServer\MSSQLServer' -Name DefaultData -Value $data_db_folder -Type String
 		Set-ItemProperty -Path 'HKLM:\Software\Microsoft\MSSQLServer\MSSQLServer' -Name DefaultLog -Value $log_db_folder -Type String
+		Restart-Service -Force MSSQLSERVER
 
 		# restore databases
 		Foreach($rdb in $rdbs)
