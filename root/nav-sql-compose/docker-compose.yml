@@ -1,7 +1,9 @@
 version: '2.1'
 services:
     sql:
-        image: microsoft/mssql-server-windows:latest
+        build: 
+            context: ..\sql
+            dockerfile: Dockerfile
         networks:
             default:
                 aliases:

@@ -3,17 +3,24 @@
 # The format for attach_dbs
 
 param(
-[Parameter(Mandatory=$false)]
-[string]$sa_password,
+	[Parameter(Mandatory=$false)]
+	[string]$sa_password,
 
-[Parameter(Mandatory=$false)]
-[string]$ACCEPT_EULA,
+	[Parameter(Mandatory=$false)]
+	[string]$ACCEPT_EULA,
 
-[Parameter(Mandatory=$false)]
-[string]$attach_dbs,
+	[Parameter(Mandatory=$false)]
+	[string]$attach_dbs,
 
-[Parameter(Mandatory=$false)]
-[string]$restore_dbs
+	[Parameter(Mandatory=$false)]
+	[string]$restore_dbs,
+
+	[Parameter(Mandatory=$false)]
+	[string]$base_db_folder,
+
+	[Parameter(Mandatory=$false)]
+	[ValidateSet("true", "false")]
+	[string]$use_hostname_folder
 )
 
 
@@ -24,9 +31,12 @@ if($ACCEPT_EULA -ne "Y" -And $ACCEPT_EULA -ne "y"){
     exit 1
 }
 
+$service = 'MSSQL$SQL'
+$passwordSecureString = ConvertTo-SecureString -String $sa_password -AsPlainText -Force;
+
 # start the service
 Write-Verbose "Starting SQL Server"
-start-service MSSQLSERVER
+start-service $service
 
 if($sa_password -ne "_"){
 	Write-Verbose "Changing SA login credentials"
@@ -58,39 +68,13 @@ if (($attach_dbs) -and ($attach_dbs -ne "")) {
 	}
 }
 
-# restore_dbs: "[{'dbName':'NAVDB','bckFile':'C:\\\\SQLDBs\\\\NAVDB.bak'}]"
-if (($restore_dbs -ne $null) -and ($restore_dbs -ne "")) {
-	$restore_dbs_cleaned = $restore_dbs.TrimStart('\\').TrimEnd('\\')
-
-	$rdbs = $restore_dbs_cleaned | ConvertFrom-Json
-
-	if ($null -ne $rdbs -And $rdbs.Length -gt 0){
-		Write-Verbose "Restoring $($rdbs.Length) database(s)"
-
-		# create folders in share with hostname which is the container id
-		$base_db_folder = ("c:\SQLDBS\" + $env:computername)
-		$log_db_folder = ($base_db_folder + "\Logs")
-		$data_db_folder = ($base_db_folder + "\Data")
-		mkdir $base_db_folder
-		mkdir $log_db_folder
-		mkdir $data_db_folder
-
-		# set default folders
-		Set-ItemProperty -Path 'HKLM:\Software\Microsoft\MSSQLServer\MSSQLServer' -Name DefaultData -Value $data_db_folder -Type String
-		Set-ItemProperty -Path 'HKLM:\Software\Microsoft\MSSQLServer\MSSQLServer' -Name DefaultLog -Value $log_db_folder -Type String
-		Restart-Service -Force MSSQLSERVER
-
-		# restore databases
-		Foreach($rdb in $rdbs)
-		{
-			Restore-SqlDatabase -ServerInstance "localhost" -Database $rdb.dbName -BackupFile $rdb.bckFile	
-		}
-	}
-}
-
-Write-Verbose "Started SQL Server."
+.\Restore-SqlDatabases.ps1 -sql_server_instance 'localhost' -restore_dbs $restore_dbs -base_db_folder $base_db_folder `
+	-use_hostname_folder $use_hostname_folder -sql_login_name 'sa' -sql_login_password $passwordSecureString
 
 $lastCheck = (Get-Date).AddSeconds(-2)
+
+Get-NetIPAddress | Format-Table
+
 while ($true) {
     Get-EventLog -LogName Application -Source "MSSQL*" -After $lastCheck | Select-Object TimeGenerated, EntryType, Message
     $lastCheck = Get-Date
