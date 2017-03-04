@@ -1,4 +1,5 @@
 call _createlinks.bat
+call ..\sql\_createlinks.bat
 
 docker-compose -f docker-compose.yml -f docker-compose.nav-image.yml -f docker-compose.configs.yml up -d
 

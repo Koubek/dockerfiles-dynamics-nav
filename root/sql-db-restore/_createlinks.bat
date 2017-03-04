@@ -1,1 +1,0 @@
-mklink /J %~dp0\SQL %~dp0\..\__content\SQL

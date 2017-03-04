@@ -94,19 +94,19 @@ try {
     Set-NAVServerInstance $SERVERINSTANCE -Restart
     Write-Verbose "Started NAV Server."
 
+    # Import Cronus license if requested
+    if ($IMPORTCRONUSLIC -eq 'true') {
+        Write-Verbose "Importing NAV license."
+        $cronusLicenseFile = Get-ChildItem -Path 'C:\install\content\DynamicsNavDvd\SQLDemoDatabase\' -Filter 'Cronus.flf' -Recurse | Select-Object -First 1
+        Import-NAVServerLicense -ServerInstance $SERVERINSTANCE -LicenseFile $cronusLicenseFile.FullName -Database NavDatabase
+    }
+
     # Create user if it is not there yet
     if ((Get-NAVServerUser -ServerInstance $SERVERINSTANCE | Where-Object { $_.UserName -eq $NAVUSER}) -eq $null) { 
         Write-Verbose "Creating NAV user."
         $password = ConvertTo-SecureString $NAVUSERPWD -AsPlainText -Force
         New-NAVServerUser -UserName $NAVUSER -Password $password -ServerInstance $SERVERINSTANCE
         New-NavServerUserPermissionSet -UserName $NAVUSER -ServerInstance $SERVERINSTANCE -PermissionSetId SUPER
-    }
-
-    # Import Cronus license if requested
-    if ($IMPORTCRONUSLIC -eq 'true') {
-        Write-Verbose "Importing NAV license."
-        $cronusLicenseFile = Get-ChildItem -Path 'C:\install\content\DynamicsNavDvd\SQLDemoDatabase\' -Filter 'Cronus.flf' -Recurse | Select-Object -First 1
-        Import-NAVServerLicense -ServerInstance $SERVERINSTANCE -LicenseFile $cronusLicenseFile.FullName -Database NavDatabase
     }
 
     Get-NetIPAddress | Format-Table

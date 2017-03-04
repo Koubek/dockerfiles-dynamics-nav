@@ -1,0 +1,1 @@
+docker run -ti --hostname=SQLFORNAV --rm -v %CD%\SQLDB:C:\SQLDB -e "ACCEPT_EULA=Y" -e "sa_password=Password1" -e "restore_dbs=[{'dbName':'NAVDB','bckFile':'C:\\\\SQLDB\\\\Demo Database NAV (10-0).bak'}]" -e "base_db_folder=c:\\SQLDB\\" myprivaterepo/sql-for-nav
