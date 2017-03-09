@@ -1,0 +1,6 @@
+/content/Server/*
+/share/*
+**/*.flf
+**/*.fdb
+__imageversion.txt
+!**/README.md*
