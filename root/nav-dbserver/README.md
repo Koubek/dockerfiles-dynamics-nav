@@ -67,7 +67,7 @@ Of course, you can go even further, you can run your container and set for examp
 
     An example of *docker run* - you can see a very similar one in the **_run.detached.bat**:
     ```
-    run -d -v %cd%\share:c:\share --hostname=NAVSERVER -e "srv_name=CRONUS" -e "db_file=C:\share\database.fdb" -e "license_file=C:\share\nav_license.flf" -e "cache_size=50000" -e "use_commit_cache=yes" myprivaterepo/nav-dbserver:6.0.32012
+    docker run -d -v %cd%\share:c:\share --hostname=NAVSERVER -e "srv_name=CRONUS" -e "db_file=C:\share\database.fdb" -e "license_file=C:\share\nav_license.flf" -e "cache_size=50000" -e "use_commit_cache=yes" myprivaterepo/nav-dbserver:6.0.32012
     ```
 
     Use *docker logs [container_name]* to see the status of the MS Dynamics NAV Database Server.
