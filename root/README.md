@@ -10,6 +10,7 @@ The purpose of the sub-folders is following:
 * **nav-sql-compose** - this folder contains docker-compose that will create two containers - NAV container and SQL container. Both of them will be connected via **nat** network.
 
 * **sql** - this folder contains Dockerfile that will allow you to create your own version of MS SQL server image. This will be necessary for *docker-compose* because we will be using some enhancements.
+
 ---
 
 * **nav-dbserver** - this folder stands a little bit aside as this is a solution to build the old *MS Dynamics NAV Database Server* (useful just for some old customers and their partners).
