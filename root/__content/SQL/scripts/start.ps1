@@ -31,7 +31,7 @@ if($ACCEPT_EULA -ne "Y" -And $ACCEPT_EULA -ne "y"){
     exit 1
 }
 
-$service = 'MSSQL$SQL'
+$service = 'MSSQLSERVER'
 $passwordSecureString = ConvertTo-SecureString -String $sa_password -AsPlainText -Force;
 
 # start the service
