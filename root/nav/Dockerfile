@@ -21,8 +21,9 @@ COPY content "c:/install/content"
 WORKDIR C:\\install\\content
 
 # Install NAV prerequisites (or at least pretend to), NAV Server and NAV default instance (will be stopped and disabled).
-RUN regedit /s c:\install\content\scripts\WIF.reg
-RUN regedit /s c:\install\content\scripts\WIF64.reg
+RUN regedit /s c:\install\content\scripts\WIF.reg; \
+    regedit /s c:\install\content\scripts\WIF64.reg
+
 RUN powershell Import-Module c:\install\content\DynamicsNavDvd\NavInstallationTools.psm1 -Force; \
     Install-NAVComponent -ConfigFile c:\install\content\scripts\Install-NavComponentConfig.xml
 
