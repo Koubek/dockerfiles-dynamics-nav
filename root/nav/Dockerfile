@@ -17,24 +17,17 @@ ENV config_instance false
 # Temporary workaround for Windows DNS client weirdness.
 RUN powershell Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters' -Name ServerPriorityTimeLimit -Value 0 -Type DWord
 
-# Install Chocolately client and prerequisite packages.
-RUN powershell iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1')); \
-    choco feature enable -n allowGlobalConfirmation; \
-    choco install microsoft-build-tools
-
-RUN powershell choco install vcredist2010; \
-    powershell choco install vcredist2013;
-
 COPY content "c:/install/content"
 WORKDIR C:\\install\\content
 
-# Install NAV prerequisites and NAV default instance (will be stopped and disabled).
-RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-Msi.ps1 'C:\install\content\DynamicsNavDvd\Prerequisite Components\Microsoft SQL Server Management Objects\SQLSysClrTypes.msi'
-RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-Msi.ps1 'C:\install\content\DynamicsNavDvd\Prerequisite Components\Microsoft SQL Server Management Objects\SharedManagementObjects.msi'
-RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-ServiceTier.ps1 -SERVERINSTANCE "DynamicsNAV"
+# Install NAV prerequisites (or at least pretend to), NAV Server and NAV default instance (will be stopped and disabled).
+RUN regedit /s c:\install\content\scripts\WIF.reg
+RUN regedit /s c:\install\content\scripts\WIF64.reg
+RUN powershell Import-Module c:\install\content\DynamicsNavDvd\NavInstallationTools.psm1 -Force; \
+    Install-NAVComponent -ConfigFile c:\install\content\scripts\Install-NavComponentConfig.xml
 
 # Expose the default NAV ports.
-EXPOSE 7045 7046 7047 7048
+EXPOSE 7045 7046 7047 7048 7049
 
 CMD powershell c:\install\content\Scripts\Run-NavService-Sql.ps1 \
     -SERVERINSTANCE %nav_instance% \
