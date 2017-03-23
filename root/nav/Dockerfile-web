@@ -23,12 +23,18 @@ WORKDIR C:\\install\\content
 # Add missing registry to be able run main setup.exe (to cheat prerequisite checks).
 RUN powershell c:\install\content\Scripts\Add-MissingRegistry.ps1
 
+# Add IIS and related features.
+RUN powershell c:\install\content\Scripts\Install-IIS.ps1
+
 # Install NAV prerequisites (or at least pretend to), NAV Server and NAV default instance (will be stopped and disabled).
+RUN powershell Start-Process -Wait -FilePath 'C:\install\content\DynamicsNavDvd\Prerequisite Components\Microsoft Visual Studio 2010 Tools For Office Redist\vstor_redist.exe' -ArgumentList "/qs", "/q"
+RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-Msi.ps1 'C:\install\content\DynamicsNavDvd\Prerequisite Components\IIS URL Rewrite Module\rewrite_2.0_rtw_x64.msi'
+
 RUN powershell Import-Module c:\install\content\DynamicsNavDvd\NavInstallationTools.psm1 -Force; \
-    Install-NAVComponent -ConfigFile c:\install\content\configs\Install-NavComponentConfig.xml
+    Install-NAVComponent -ConfigFile c:\install\content\configs\Install-NavComponentConfig-web.xml
 
 # Expose the default NAV ports.
-EXPOSE 7045-7049
+EXPOSE 80 443 7045-7049 8080-8089
 
 CMD powershell c:\install\content\Scripts\Run-NavService-Sql.ps1 \
     -SERVERINSTANCE %nav_instance% \

@@ -1,0 +1,6 @@
+version: '2.1'
+services:
+    nav:
+        build: 
+            context: ..\nav
+            dockerfile: Dockerfile-web
