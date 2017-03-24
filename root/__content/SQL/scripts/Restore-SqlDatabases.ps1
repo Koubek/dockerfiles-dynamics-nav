@@ -22,6 +22,9 @@ param(
     [SecureString]$sql_login_password
 )
 
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo")
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.ConnectionInfo")
+
 $currDir = Split-Path $MyInvocation.MyCommand.Definition
 
 # create folders in share with hostname which is the container id
