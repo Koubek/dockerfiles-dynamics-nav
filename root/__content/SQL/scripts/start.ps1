@@ -31,6 +31,7 @@ if($ACCEPT_EULA -ne "Y" -And $ACCEPT_EULA -ne "y"){
     exit 1
 }
 
+
 $service = 'MSSQLSERVER'
 $passwordSecureString = ConvertTo-SecureString -String $sa_password -AsPlainText -Force;
 
@@ -41,7 +42,7 @@ start-service $service
 if($sa_password -ne "_"){
 	Write-Verbose "Changing SA login credentials"
     $sqlcmd = "ALTER LOGIN sa with password=" +"'" + $sa_password + "'" + ";ALTER LOGIN sa ENABLE;"
-    Invoke-Sqlcmd -Query $sqlcmd
+    & sqlcmd -Q $sqlcmd
 }
 
 if (($attach_dbs) -and ($attach_dbs -ne "")) {
@@ -62,8 +63,8 @@ if (($attach_dbs) -and ($attach_dbs -ne "")) {
 			$files = $files -join ","
 			$sqlcmd = "sp_detach_db $($db.dbName);CREATE DATABASE $($db.dbName) ON $($files) FOR ATTACH ;"
 
-			Write-Verbose "Invoke-Sqlcmd -Query $($sqlcmd)"
-			Invoke-Sqlcmd -Query $sqlcmd
+			Write-Verbose "& sqlcmd -Q $sqlcmd"
+			& sqlcmd -Q $sqlcmd
 		}
 	}
 }
