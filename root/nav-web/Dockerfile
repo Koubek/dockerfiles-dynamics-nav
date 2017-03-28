@@ -33,6 +33,9 @@ RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-
 RUN powershell Import-Module c:\install\content\DynamicsNavDvd\NavInstallationTools.psm1 -Force; \
     Install-NAVComponent -ConfigFile c:\install\content\configs\Install-NavComponentConfig-web.xml
 
+# To be able load all installed NAV modules using Import-NavModulesGlobally
+RUN powershell c:\install\content\Scripts\Update-PSProfile.ps1
+
 # Expose the default NAV ports.
 EXPOSE 80 443 7045-7049 8080-8089
 

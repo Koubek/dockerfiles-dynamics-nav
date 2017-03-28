@@ -23,6 +23,9 @@ param(
 )
 
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo")
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo.SqlEnum")
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo.SmoEnum")
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.SmoExtended")
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.ConnectionInfo")
 
 $currDir = Split-Path $MyInvocation.MyCommand.Definition

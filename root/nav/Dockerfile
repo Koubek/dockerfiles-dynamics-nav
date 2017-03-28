@@ -21,11 +21,14 @@ COPY content "c:/install/content"
 WORKDIR C:\\install\\content
 
 # Add missing registry to be able run main setup.exe (to cheat prerequisite checks).
-RUN powershell c:\install\content\Scripts\Add-MissingRegistry.ps1
+RUN powershell  c:\install\content\Scripts\Add-MissingRegistry.ps1
 
 # Install NAV prerequisites (or at least pretend to), NAV Server and NAV default instance (will be stopped and disabled).
 RUN powershell Import-Module c:\install\content\DynamicsNavDvd\NavInstallationTools.psm1 -Force; \
     Install-NAVComponent -ConfigFile c:\install\content\configs\Install-NavComponentConfig.xml
+
+# To be able load all installed NAV modules using Import-NavModulesGlobally
+RUN powershell c:\install\content\Scripts\Update-PSProfile.ps1
 
 # Expose the default NAV ports.
 EXPOSE 7045-7049
