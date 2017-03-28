@@ -9,3 +9,6 @@ Install-WindowsFeature Web-Mgmt-Tools -IncludeAllSubFeature -IncludeManagementTo
 Install-WindowsFeature Web-Net-Ext
 Install-WindowsFeature Web-Net-Ext45
 Install-WindowsFeature Web-Windows-Auth
+
+Set-WebConfigurationProperty -filter /system.WebServer/security/authentication/AnonymousAuthentication -name enabled -value false -PSPath IIS:\
+Set-WebConfigurationProperty -filter /system.webServer/security/authentication/windowsAuthentication -name enabled -value true -PSPath IIS:\
