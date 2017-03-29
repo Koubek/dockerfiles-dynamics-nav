@@ -11,6 +11,8 @@ services:
     nav:
         depends_on:
             - "sql"
+        ports:
+            - "7045-7049:7045-7049"
         networks:
             default:
                 aliases:

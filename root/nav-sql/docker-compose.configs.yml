@@ -30,6 +30,12 @@ services:
 
             # Put "Y" to accept EULA.
             ACCEPT_EULA: "Y"
+
+        security_opt: 
+            - "credentialspec=file://navsql_sql_1.json"
+
+        hostname: "navsql_sql_1"
+
         ports:
             - "1433:1433" # for debug. Remove this for production
     nav:
@@ -68,3 +74,8 @@ services:
             # When restarting container and this parameter is true, all steps will be repeated and can override
             # some manually configured values.
             config_instance: "false"
+
+        security_opt: 
+            - "credentialspec=file://navsql_nav_1.json"
+
+        hostname: "navsql_nav_1"
