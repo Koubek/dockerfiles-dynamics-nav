@@ -109,14 +109,16 @@ try {
         New-NavServerUserPermissionSet -UserName $NAVUSER -ServerInstance $SERVERINSTANCE -PermissionSetId SUPER
     }
 
-    Get-NetIPAddress | Format-Table
+    $lastCheck = (Get-Date).AddSeconds(-2)
 
+    Get-NetIPAddress | Format-Table
     Write-Verbose "NAV Server should be running..."
 
-    while ($true) 
-     {  
-         Start-Sleep -Seconds 3600 
-     } 
+    while ($true) {
+        Get-EventLog -LogName Application -Source ("*" + $navInstance + "*") -After $lastCheck | Select-Object TimeGenerated, EntryType, Message
+        $lastCheck = Get-Date
+        Start-Sleep -Seconds 2
+    } 
 }
 catch {
     Write-Host "NAV Server error: " $_.Exception.Message -ForegroundColor Red
