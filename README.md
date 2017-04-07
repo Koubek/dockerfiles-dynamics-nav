@@ -1,4 +1,6 @@
 # Dockerfiles for MS Dynamics NAV
+[![Join the chat at https://gitter.im/dockerfiles-dynamics-nav/Lobby](https://badges.gitter.im/dockerfiles-dynamics-nav/Lobby.svg)](https://gitter.im/dockerfiles-dynamics-nav/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 At the first moment the idea of this repository was to confirm that MS Dynamics NAV server could be serverd via [Docker](https://www.docker.com) container.
 At this moment I had a Dockerfile ready and some docker-compose files as well. I was able to build related containers with all services but there was an issue when starting NAV services inside the container.
 The problem was caused by some missing dependencies (DLLs) and this problem was solved by [Tobias Fenster](https://github.com/tfenster).
