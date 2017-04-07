@@ -4,15 +4,9 @@ MAINTAINER Jakub Vanak
 
 ENV chocolateyUseWindowsCompression false
 # Docker run variables to create and configure new instance.
-ENV nav_instance "DynamicsNAV"
-ENV sql_server _
-ENV sql_db _
-ENV sql_user _
-ENV sql_pwd _
-ENV nav_user _
-ENV nav_user_pwd _
-ENV import_cronus_license false
-ENV config_instance false
+ENV nav_server _
+ENV nav_instance _
+ENV nav_client_port _
 
 # Temporary workaround for Windows DNS client weirdness.
 RUN powershell Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters' -Name ServerPriorityTimeLimit -Value 0 -Type DWord
@@ -33,19 +27,12 @@ RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-
 RUN powershell Import-Module c:\install\content\DynamicsNavDvd\NavInstallationTools.psm1 -Force; \
     Install-NAVComponent -ConfigFile c:\install\content\configs\Install-NavComponentConfig-web.xml
 
-# To be able load all installed NAV modules using Import-NavModulesGlobally
-RUN powershell c:\install\content\Scripts\Update-PSProfile.ps1
+RUN powershell c:\install\content\Scripts\New-WebInstance.ps1 \
+    -NAVSERVER %nav_server% \ 
+    -NAVINSTANCE %nav_instance% \
+    -NAVCLIENTPORT %nav_client_port%
 
-# Expose the default NAV ports.
-EXPOSE 80 443 7045-7049 8080-8089
+# Expose the default IIS ports.
+EXPOSE 80 443
 
-CMD powershell c:\install\content\Scripts\Run-NavService-Sql.ps1 \
-    -SERVERINSTANCE %nav_instance% \
-    -DBSERVER %sql_server% \
-    -DBNAME %sql_db% \
-    -DBUSER %sql_user% \
-    -DBUSERPWD %sql_pwd% \
-    -NAVUSER %nav_user% \
-    -NAVUSERPWD %nav_user_pwd% \
-    -IMPORTCRONUSLIC %import_cronus_license% \
-    -RECONFIGUREEXISTINGINSTANCE %config_instance%
+ENTRYPOINT ["C:\\install\\content\\bin\\ServiceMonitor.exe", "w3svc"]

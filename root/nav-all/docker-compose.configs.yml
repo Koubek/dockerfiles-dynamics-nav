@@ -1,0 +1,97 @@
+version: '2.1'
+services:
+    sql:
+        volumes: 
+            # Volumes to be mapped between the host:container.
+            # Don`t change the right side if don`t understand it (or change rest of the paths in this documents as well).
+            - .\SQL\DB:C:\SQLDB
+        environment:        
+            # sa password (this needs to be changed as this is not secure!!!).
+            # This value must match 'services.nav.environment.sql_pwd' in this file.
+            sa_password: "Password1"
+            
+            # Use attach_dbs only when working with a DB that needs to be attached just with the first run =>
+            # => you have db files and not just the backup.
+            # attach_dbs: "[{'dbName':'NAVDB','dbFiles':['C:\\\\SQLDB\\\\NAVDB_Data.mdf','C:\\\\SQLDB\\\\NAVDB_Log.ldf']}]"
+            
+            # USER-TO-DO
+            # Use restore_dbs when you want to restore a DB backup on the first run. The script will handle it and with
+            # any following start (container start) will attach an existing DB that was deployed during the first run.
+            # This means that the data should remain persistent between every single run.            
+            restore_dbs: "[{'dbName':'NAVDB','bckFile':'C:\\\\SQLDB\\\\Demo Database NAV (10-0).bak'}]"
+            
+            # Folder where the DBs will be restored to (and also recovered when attaching).
+            # This path must match with the mapped paths ('volumes').
+            base_db_folder: "C:\\SQLDB\\"
+
+            # If true there will be a folder per hostname in 'base_db_folder' (C:\SQLDB\[HOSTNAME]\DATA\).
+            # If false the DB files will be stored directly in the 'base_db_folder'\DATA (C:\SQLDB\DATA\).
+            use_hostname_folder: "false"
+
+            # Put "Y" to accept EULA.
+            ACCEPT_EULA: "Y"
+
+        security_opt: 
+            - "credentialspec=file://navall_sql_1.json"
+
+        hostname: "navall_sql_1"
+
+        ports:
+            - "1433:1433" # for debug. Remove this for production
+    nav:
+        environment:
+            # NAV service instance name.
+            nav_instance: "NAVSERVICE"
+
+            # Name of the sql (sql/instance). We are using a reference to service name (sql) defined in 'docker-compose.yml'.
+            sql_server: "sql"
+            
+            # USER-TO-DO
+            # Must match 'services.sql.environment.restore_dbs[any].dbName' or
+            # 'services.sql.environment.attach_dbs[any].dbName'
+            sql_db: "NAVDB"
+
+            # sa or an existing SQL user (db_owner).
+            sql_user: "sa"
+
+            # Must match 'services.sql.environment.sa_password' or just pwd of 'services.nav.environment.sql_user'.
+            sql_pwd: "Password1"
+
+            # USER-CAN-DO
+            # NAV user name.
+            nav_user: "MYNAVUSER"
+
+            # USER-CAN-DO
+            # NAV user password.
+            nav_user_pwd: "MyNavUserPwd1@"
+            
+            # RECOMMENDED: true
+            # Import the license in case of starting a fresh SQL instance (current docker-compose case).
+            import_cronus_license: "true"
+            
+            # RECOMMENDED: false
+            # If false => won`t reconfigure an existing NAV instance.
+            # When restarting container and this parameter is true, all steps will be repeated and can override
+            # some manually configured values.
+            config_instance: "false"
+
+        security_opt: 
+            - "credentialspec=file://navall_nav_1.json"
+
+        hostname: "navall_nav_1"
+
+    web:
+        environment:
+            # NAV service instance name.
+            nav_instance: "NAVSERVICE"
+           
+            # Name of the NAV server. We are using a reference to service name (nav) defined in 'docker-compose.yml'.
+            nav_server: "nav"
+
+            # Client Service port of the NAV instance
+            nav_client_port: "7046"
+
+        security_opt: 
+            - "credentialspec=file://navall_web_1.json"
+
+        hostname: "navallweb1"
