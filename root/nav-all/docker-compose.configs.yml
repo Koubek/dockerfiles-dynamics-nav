@@ -94,4 +94,4 @@ services:
         security_opt: 
             - "credentialspec=file://navall_web_1.json"
 
-        hostname: "navallweb1"
+        hostname: "navall_web_1"
