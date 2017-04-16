@@ -27,12 +27,10 @@ RUN powershell -executionpolicy RemoteSigned c:\install\content\scripts\Install-
 RUN powershell Import-Module c:\install\content\DynamicsNavDvd\NavInstallationTools.psm1 -Force; \
     Install-NAVComponent -ConfigFile c:\install\content\configs\Install-NavComponentConfig-web.xml
 
-RUN powershell c:\install\content\Scripts\New-WebInstance.ps1 \
-    -NAVSERVER %nav_server% \ 
-    -NAVINSTANCE %nav_instance% \
-    -NAVCLIENTPORT %nav_client_port%
-
 # Expose the default IIS ports.
 EXPOSE 80 443
 
-ENTRYPOINT ["C:\\install\\content\\bin\\ServiceMonitor.exe", "w3svc"]
+CMD powershell c:\install\content\Scripts\New-WebInstance.ps1 \
+    -NAVSERVER %nav_server% \ 
+    -NAVINSTANCE %nav_instance% \
+    -NAVCLIENTPORT %nav_client_port%

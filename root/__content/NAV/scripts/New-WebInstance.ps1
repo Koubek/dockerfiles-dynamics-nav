@@ -33,3 +33,12 @@ New-WebBinding -Name $websitename -IPAddress * -Port 443 -Protocol https -Verbos
 $thumbprint = '0ED65CB18D285E4EF3975AE2FCB55E693549709B'
 $certificate = Get-Item cert:\localmachine\Root\$thumbprint
 $certificate | New-Item "IIS:\SSLBindings\0.0.0.0!443" -Verbose
+
+$lastCheck = (Get-Date).AddSeconds(-2)
+
+Get-NetIPAddress | Format-Table
+Write-Verbose "NAV Web Server instance should be running..."
+
+Start-Process "C:\\install\\content\\bin\\ServiceMonitor.exe" -ArgumentList "w3svc" -Wait
+
+Write-Verbose "w3svc has been stopped, exiting..."
