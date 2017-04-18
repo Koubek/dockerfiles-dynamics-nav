@@ -1,7 +1,8 @@
 ﻿<#
 
     PATTERN: 
-        ((?<=\s+-{2}hostname\s*\s*(=\s*|(\"?|\'?)|=\s*(\"|\')*))\w+\b(?=(\"?|\'?)))?((?<=\s+-{1}h{1}\s*(=\s*|(\"?|\'?)|=\s*(\"|\')*))\w+\b(?=(\"?|\'?)))?
+        (?<=\s+-{2}hostname\s*\s*(=\s*|(\"?|\'?)|=\s*(\"|\')*))\w+\b(?=(\"?|\'?))
+        (?<=\s+-{1}h{1}\s*(=\s*|(\"?|\'?)|=\s*(\"|\')*))\w+\b(?=(\"?|\'?))
 
     POSSIBILITIES:
      --hostname test name
@@ -30,10 +31,15 @@ param (
     [Object] $Content
 )
 
-$pattern = '((?<=\s+-{2}hostname\s*\s*(=\s*|(\"?|\''?)|=\s*(\"|\'')*))\w+\b(?=(\"?|\''?)))?((?<=\s+-{1}h{1}\s*(=\s*|(\"?|\''?)|=\s*(\"|\'')*))\w+\b(?=(\"?|\''?)))?'
+$patterns = @('(?<=\s+-{2}hostname\s*\s*(=\s*|(\"?|\''?)|=\s*(\"|\'')*))\w+\b(?=(\"?|\''?))', '(?<=\s+-{1}h{1}\s*(=\s*|(\"?|\''?)|=\s*(\"|\'')*))\w+\b(?=(\"?|\''?))')
+$values = @()
 
-$regex = new-object System.Text.RegularExpressions.Regex ($pattern, [System.Text.RegularExpressions.RegexOptions]::Singleline)
+foreach ($pattern in $patterns) {
 
-$values = $regex.Matches($Content) | ForEach-Object { $_.Value }
+    $regex = new-object System.Text.RegularExpressions.Regex ($pattern, [System.Text.RegularExpressions.RegexOptions]::Singleline)
+
+    $values += $regex.Matches($Content) | ForEach-Object { $_.Value }
+
+}
 
 return $values
