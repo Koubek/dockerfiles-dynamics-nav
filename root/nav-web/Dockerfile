@@ -7,6 +7,7 @@ ENV chocolateyUseWindowsCompression false
 ENV nav_server _
 ENV nav_instance _
 ENV nav_client_port _
+ENV nav_web_instance NAVWEB
 
 # Temporary workaround for Windows DNS client weirdness.
 RUN powershell Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters' -Name ServerPriorityTimeLimit -Value 0 -Type DWord
@@ -33,4 +34,5 @@ EXPOSE 80 443
 CMD powershell c:\install\content\Scripts\New-WebInstance.ps1 \
     -NAVSERVER %nav_server% \ 
     -NAVINSTANCE %nav_instance% \
-    -NAVCLIENTPORT %nav_client_port%
+    -NAVCLIENTPORT %nav_client_port% \
+    -NAVWEBINSTANCE %nav_web_instance%

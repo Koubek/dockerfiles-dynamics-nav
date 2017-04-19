@@ -88,8 +88,11 @@ services:
             # Name of the NAV server. We are using a reference to service name (nav) defined in 'docker-compose.yml'.
             nav_server: "nav"
 
-            # Client Service port of the NAV instance
+            # Client Service port of the NAV instance.
             nav_client_port: "7046"
+
+            # Name of the NAV Web Instance that will be created.
+            nav_web_instance: "NAVWEB"
 
         security_opt: 
             - "credentialspec=file://navall_web_1.json"
