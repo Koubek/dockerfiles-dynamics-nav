@@ -3,8 +3,8 @@
     [Parameter(Mandatory=$true)]
     [String[]]$hostNames,
 
-    #[Parameter(Mandatory=$false)]
-    #[String]$searchScope,
+    [Parameter(Mandatory=$false)]
+    [String]$path,
 
     [Parameter(Mandatory=$false)]
     [String[]]$principalsAllowedToRetrieveManagedPassword = @( "DockerGMSAGroup" )
@@ -26,6 +26,7 @@ foreach ($hostname in $hostNames) {
         Write-Verbose "Creating ADServiceAccount..."
         New-ADServiceAccount -name $hostName `
             -DnsHostName $dnsHostName `
+            -Path $path `
             -PrincipalsAllowedToRetrieveManagedPassword $principalsAllowedToRetrieveManagedPassword
 
     } else {
