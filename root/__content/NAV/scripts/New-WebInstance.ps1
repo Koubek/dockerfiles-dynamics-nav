@@ -18,7 +18,7 @@ param(
 # 0ED65CB18D285E4EF3975AE2FCB55E693549709B
 
 $certPath = 'C:\install\content\navcert.pfx'
-$thumbprint = Get-PfxCertificate -FilePath $certPath
+$thumbprint = (Get-PfxCertificate -FilePath $certPath).Thumbprint
 $certStoreLocation = 'Cert:\LocalMachine\Root'
 
 $navAdminToolFile = Get-ChildItem -Path $env:ProgramFiles -Filter NavAdminTool.ps1 -Recurse
@@ -32,7 +32,7 @@ $instance = Get-NAVWebServerInstance $NAVWEBINSTANCE
 if (($instance | Measure-Object).Count -lt 1) {
 
   New-NAVWebServerInstance -ClientServicesCredentialType NavUserPassword -ClientServicesPort $NAVCLIENTPORT `
-    -DnsIdentity NAVSERVER -Server $NAVSERVER -ServerInstance $NAVINSTANCE -WebServerInstance NAVWEBINSTANCE -Verbose
+    -DnsIdentity NAVSERVER -Server $NAVSERVER -ServerInstance $NAVINSTANCE -WebServerInstance $NAVWEBINSTANCE -Verbose
 
   Import-PfxCertificate $certPath -CertStoreLocation $certStoreLocation -Verbose
 
