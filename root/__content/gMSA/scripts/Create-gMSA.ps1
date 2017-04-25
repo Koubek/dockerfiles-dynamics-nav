@@ -24,10 +24,17 @@ foreach ($hostname in $hostNames) {
 
     if ($account -eq $null) {
         Write-Verbose "Creating ADServiceAccount..."
-        New-ADServiceAccount -name $hostName `
-            -DnsHostName $dnsHostName `
-            -Path $path `
-            -PrincipalsAllowedToRetrieveManagedPassword $principalsAllowedToRetrieveManagedPassword
+
+        if ([System.String]::IsNullOrEmpty($path) -eq $true) {
+            New-ADServiceAccount -name $hostName `
+                -DnsHostName $dnsHostName `
+                -PrincipalsAllowedToRetrieveManagedPassword $principalsAllowedToRetrieveManagedPassword
+        } else {
+            New-ADServiceAccount -name $hostName `
+                -DnsHostName $dnsHostName `
+                -Path $path `
+                -PrincipalsAllowedToRetrieveManagedPassword $principalsAllowedToRetrieveManagedPassword
+        }
 
     } else {
         Write-Verbose "ADServiceAccount already exists."
