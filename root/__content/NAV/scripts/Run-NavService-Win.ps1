@@ -57,12 +57,7 @@ if (!$instanceExist) {
 if ((!$instanceExist) -or ($RECONFIGUREEXISTINGINSTANCE -eq 'true')) {
     Set-NAVServerConfiguration $SERVERINSTANCE -KeyName DatabaseServer -KeyValue $DBSERVER
     Set-NAVServerConfiguration $SERVERINSTANCE -KeyName DatabaseName -KeyValue $DBNAME
-
     Set-NAVServerConfiguration $SERVERINSTANCE -KeyName ServicesCertificateValidationEnabled -KeyValue false
-    # Set-NAVServerConfiguration $SERVERINSTANCE -KeyName ClientServicesCredentialType -KeyValue Windows
-
-    # Set-NAVServerConfiguration $SERVERINSTANCE -KeyName  -KeyValue 
-    Set-NAVServerConfiguration $SERVERINSTANCE -KeyName CompileBusinessApplicationAtStartup -KeyValue false
 }
 
 try {
