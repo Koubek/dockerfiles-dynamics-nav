@@ -1,6 +1,6 @@
 FROM microsoft/mssql-server-windows:latest
 
-MAINTAINER Jakub Vanak
+LABEL maintainer "Jakub Vanak, Tobias Fenster"
 
 # Docker run variables to create and configure new instance.
 ENV sa_password _

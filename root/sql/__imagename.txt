@@ -1,1 +1,1 @@
-sql-for-nav
+nav-sqlserver

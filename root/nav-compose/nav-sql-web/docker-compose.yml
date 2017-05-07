@@ -1,0 +1,34 @@
+version: '3.0'
+services:
+    sql:        
+        image: ${repo}/${sqlImageName}
+        networks:
+            default:
+                aliases:
+                    - sql
+    nav:
+        image: ${repo}/${navImageNameWin}
+        depends_on:
+            - "sql"
+        ports:
+            - "7045-7049:7045-7049"
+        networks:
+            default:
+                aliases:
+                    - nav
+    web:
+        image: ${repo}/${navWebImageName}
+        depends_on:
+            - "nav"
+        ports:
+            - "80:80"
+            - "443:443"
+        networks:
+            default:
+                aliases:
+                    - web
+
+networks:
+  default:
+    external:
+      name: nat

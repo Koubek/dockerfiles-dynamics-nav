@@ -1,0 +1,1 @@
+. (Join-Path $PSScriptRoot '..\_presetvars.sql.ps1')
