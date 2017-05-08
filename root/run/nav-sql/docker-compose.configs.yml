@@ -4,7 +4,7 @@ services:
         volumes: 
             # Volumes to be mapped between the host:container.
             # Don`t change the right side if don`t understand it (or change rest of the paths in this documents as well).
-            - .\SQL\DB:C:\SQLDB
+            - .\..\..\__content_user\SQLDB:C:\SQLDB
         environment:        
             # sa password (this needs to be changed as this is not secure!!!).
             # This value must match 'services.nav.environment.sql_pwd' in this file.
@@ -30,14 +30,9 @@ services:
 
             # Put "Y" to accept EULA.
             ACCEPT_EULA: "Y"
-
-        security_opt: 
-            - "credentialspec=file://navall_sql_1.json"
-
-        hostname: "navall_sql_1"
-
         ports:
             - "1433:1433" # for debug. Remove this for production
+
     nav:
         environment:
             # NAV service instance name.
@@ -74,27 +69,3 @@ services:
             # When restarting container and this parameter is true, all steps will be repeated and can override
             # some manually configured values.
             config_instance: "false"
-
-        security_opt: 
-            - "credentialspec=file://navall_nav_1.json"
-
-        hostname: "navall_nav_1"
-
-    web:
-        environment:
-            # NAV service instance name.
-            nav_instance: "NAVSERVICE"
-           
-            # Name of the NAV server. We are using a reference to service name (nav) defined in 'docker-compose.yml'.
-            nav_server: "nav"
-
-            # Client Service port of the NAV instance.
-            nav_client_port: "7046"
-
-            # Name of the NAV Web Instance that will be created.
-            nav_web_instance: "NAVWEB"
-
-        security_opt: 
-            - "credentialspec=file://navall_web_1.json"
-
-        hostname: "navall_web_1"

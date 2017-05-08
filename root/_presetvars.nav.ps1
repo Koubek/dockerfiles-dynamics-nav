@@ -1,13 +1,13 @@
-Remove-Item __imageversion.txt
-& (Join-Path $PSScriptRoot '__content\NAV\scripts\Get-NavVersion.ps1') (Join-Path $PSScriptRoot '__content_user\NAVDVD') > __imageversion.txt
+Remove-Item (Join-Path $PSScriptRoot '__imageversion.nav.txt')
+& (Join-Path $PSScriptRoot '__content\NAV\scripts\Get-NavVersion.ps1') (Join-Path $PSScriptRoot '__content_user\NAVDVD') > (Join-Path $PSScriptRoot '__imageversion.nav.txt')
 
 $versionArgSupported = [System.Version] $($(docker version --format '{{.Server.Version}}').SubString(0, 5)) -ge [System.Version] "17.05"
 
 $repo = Get-Content (Join-Path $PSScriptRoot '__privatereponame.txt')
 Write-Verbose "REPO: $repo"
-$imageName = Get-Content '__imagename.txt'
+$imageName = Get-Content (Join-Path $PSScriptRoot '__imagename.nav.txt')
 Write-Verbose "BASE IMAGE NAME: $imageName"
-$navVersion = Get-Content '__imageversion.txt'
+$navVersion = Get-Content (Join-Path $PSScriptRoot '__imageversion.nav.txt')
 Write-Verbose "NAV VERSION: $navVersion"
 
 $navDvdImageName = 'navdvd:' + $navVersion

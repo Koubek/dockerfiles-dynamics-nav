@@ -7,7 +7,7 @@ services:
                 aliases:
                     - sql
     nav:
-        image: ${repo}/${navImageNameWin}
+        image: ${repo}/${navImageNameSql}
         depends_on:
             - "sql"
         ports:
@@ -16,17 +16,6 @@ services:
             default:
                 aliases:
                     - nav
-    web:
-        image: ${repo}/${navWebImageName}
-        depends_on:
-            - "nav"
-        ports:
-            - "80:80"
-            - "443:443"
-        networks:
-            default:
-                aliases:
-                    - web
 
 networks:
   default:
