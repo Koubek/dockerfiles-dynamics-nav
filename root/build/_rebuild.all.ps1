@@ -1,3 +1,8 @@
+[CmdletBinding()]
+param (
+
+)
+
 # Build NAV imaegs.
 Push-Location
 try {
