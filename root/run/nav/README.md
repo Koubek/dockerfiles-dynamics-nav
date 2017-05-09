@@ -10,6 +10,6 @@ Instantiate independent NAV containers (right now an example with SQL authentica
     * Please, just change all necessary parameters (*-e* values) in the script, eventually, you also change the network driver and remove port mappings etc.
  * `_run.winAuth.ps1`
     * Creates an independent NAV container on the default network (we are considering to be a **nat** network).
-    * This container requires an existing and accessible SQL server instance. The authentication betwen NAV and SQL server will be provided via **Windows Authentication** so you have to create a *Windows login* on the SQL server with *db_owner* privileges on the target database.
+    * This container requires an existing and accessible SQL server instance. The authentication between NAV and SQL server will be provided via **Windows Authentication** so you have to create a *Windows login* on the SQL server with *db_owner* privileges on the target database.
     * NAV user authentication uses **Windows**. This must be properly created in the target database.
     * **This demo requires gMSA to be active and properly configured.**

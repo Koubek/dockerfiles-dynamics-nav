@@ -18,6 +18,8 @@ WORKDIR C:\\install\\content
 
 # Add missing registry to be able run main setup.exe (to cheat prerequisite checks).
 RUN powershell c:\install\content\Scripts\Add-MissingRegistry.ps1; \
+    # Set product version (convert installation config file template to the real config file).
+    c:\install\content\Scripts\Convert-NavInstallConfigTmpl.ps1 c:\install\content\configs\Install-NavComponentConfig.tmpl.xml c:\install\content\configs\Install-NavComponentConfig.xml; \
     # Install NAV prerequisites (or at least pretend to), NAV Server and NAV default instance (will be stopped and disabled).
     Import-Module c:\install\content\DynamicsNavDvd\NavInstallationTools.psm1 -Force; \
     Install-NAVComponent -ConfigFile c:\install\content\configs\Install-NavComponentConfig.xml;

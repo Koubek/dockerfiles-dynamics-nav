@@ -14,11 +14,11 @@
   <Component Id="RoleTailoredClient" State="Absent" ShowOptionNode="yes"/>
   <Component Id="ExcelAddin" State="Absent" ShowOptionNode="yes"/>
   <Component Id="ClassicClient" State="Absent" ShowOptionNode="yes"/>
-  <Parameter Id="TargetPath" Value="[WIX_ProgramFilesFolder]\Microsoft Dynamics NAV\100"/>
-  <Parameter Id="TargetPathX64" Value="[WIX_ProgramFilesX64Folder]\Microsoft Dynamics NAV\100"/>
+  <Parameter Id="TargetPath" Value="[WIX_ProgramFilesFolder]\Microsoft Dynamics NAV\[DOCKER.NAV_VERSION]"/>
+  <Parameter Id="TargetPathX64" Value="[WIX_ProgramFilesX64Folder]\Microsoft Dynamics NAV\[DOCKER.NAV_VERSION]"/>
   <Parameter Id="NavServiceSQMOption" Value="false"/>
   <Parameter Id="NavServiceServerName" Value="localhost"/>
-  <Parameter Id="NavServiceInstanceName" Value="SampleDynamicsNAV100"/>
+  <Parameter Id="NavServiceInstanceName" Value="SampleDynamicsNAV[DOCKER.NAV_VERSION]"/>
   <Parameter Id="NavServiceAccount" Value="NT AUTHORITY\NETWORK SERVICE"/>
   <Parameter Id="NavServiceAccountPassword" IsHidden="yes" Value=""/>
   <Parameter Id="NavServiceClientServicesPort" Value="37046"/>

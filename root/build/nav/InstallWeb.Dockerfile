@@ -14,6 +14,8 @@ WORKDIR C:\\install\\content
 
 # Add missing registry to be able run main setup.exe (to cheat prerequisite checks).
 RUN powershell c:\install\content\Scripts\Add-MissingRegistry.ps1; \
+    # Set product version (convert installation config file template to the real config file).
+    c:\install\content\Scripts\Convert-NavInstallConfigTmpl.ps1 c:\install\content\configs\Install-NavComponentConfig-web.tmpl.xml c:\install\content\configs\Install-NavComponentConfig-web.xml; \
     # Add IIS and related features.
     c:\install\content\Scripts\Install-IIS.ps1; \
     # Install NAV prerequisites (or at least pretend to), NAV Server and NAV default instance (will be stopped and disabled).
