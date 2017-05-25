@@ -2,6 +2,8 @@ version: '3.0'
 services:
     sql:        
         image: ${repo}/${sqlImageName}
+        ports:
+            - "1433:1433"
         networks:
             default:
                 aliases:

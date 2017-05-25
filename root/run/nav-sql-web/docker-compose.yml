@@ -1,0 +1,36 @@
+version: '3.0'
+services:
+    sql:        
+        image: ${repo}/${sqlImageName}
+        ports:
+            - "1433"
+        networks:
+            default:
+                aliases:
+                    - demo_sql
+    nav:
+        image: ${repo}/${navImageNameSql}
+        depends_on:
+            - "sql"
+        ports:
+            - "7045-7049"
+        networks:
+            default:
+                aliases:
+                    - demo_nav
+    web:
+        image: ${repo}/${navWebImageName}
+        depends_on:
+            - "nav"
+        expose:
+            - "80"
+            - "443"
+        networks:
+            default:
+                aliases:
+                    - demo_web
+
+networks:
+  default:
+    external:
+      name: transparent

@@ -31,13 +31,18 @@ services:
             # Put "Y" to accept EULA.
             ACCEPT_EULA: "Y"
 
+        security_opt: 
+            - "credentialspec=file://demo_sql.json"
+
+        hostname: "demo_sql"
+
     nav:
         environment:
             # NAV service instance name.
             nav_instance: "NAVSERVICE"
 
             # Name of the sql (sql/instance). We are using a reference to service name (sql) defined in 'docker-compose.yml'.
-            sql_server: "sql"
+            sql_server: "demo_sql"
             
             # USER-TO-DO
             # Must match 'services.sql.environment.restore_dbs[any].dbName' or
@@ -67,3 +72,27 @@ services:
             # When restarting container and this parameter is true, all steps will be repeated and can override
             # some manually configured values.
             config_instance: "false"
+
+        security_opt: 
+            - "credentialspec=file://demo_nav.json"
+
+        hostname: "demo_nav"
+
+    web:
+        environment:
+            # NAV service instance name.
+            nav_instance: "NAVSERVICE"
+           
+            # Name of the NAV server. We are using a reference to service name (nav) defined in 'docker-compose.yml'.
+            nav_server: "demo_nav"
+
+            # Client Service port of the NAV instance.
+            nav_client_port: "7046"
+
+            # Name of the NAV Web Instance that will be created.
+            nav_web_instance: "NAVWEB"
+
+        security_opt: 
+            - "credentialspec=file://demo_web.json"
+
+        hostname: "demo_web"
