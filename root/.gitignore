@@ -1,3 +1,7 @@
 **/DynamicsNavDvd/*
-**/SQL/DB/*
+**/NAVDVD/*
+**/SQLDB/*
+*.tmp
+__imageversion.nav.txt
+__imageversion.sql.txt
 !**/README.md*

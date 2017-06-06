@@ -1,0 +1,35 @@
+version: '3.0'
+services:
+    sql:
+        build: 
+            # image: myprivaterepo/navservice:10.0.15601.0   # 15140 15601 this image must be available/build it before!
+            context: ..\sql
+            dockerfile: Dockerfile
+        networks:
+            default:
+                aliases:
+                    - sql
+    nav:
+        depends_on:
+            - "sql"
+        ports:
+            - "7045-7049:7045-7049"
+        networks:
+            default:
+                aliases:
+                    - nav
+    web:
+        depends_on:
+            - "nav"
+        ports:
+            - "80:80"
+            - "443:443"
+        networks:
+            default:
+                aliases:
+                    - web
+
+networks:
+  default:
+    external:
+      name: nat

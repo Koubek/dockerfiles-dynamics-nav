@@ -1,0 +1,23 @@
+version: '2.1'
+services:
+    sql:
+        build: 
+            context: ..\sql
+            dockerfile: Dockerfile
+        networks:
+            default:
+                aliases:
+                    - sql
+    nav:
+        depends_on:
+            - "sql"
+        ports:
+            - "7045-7049:7045-7049"
+        networks:
+            default:
+                aliases:
+                    - nav
+networks:
+  default:
+    external:
+      name: nat

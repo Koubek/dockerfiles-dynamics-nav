@@ -1,21 +1,60 @@
-#################################################################################
-# THIS IS REALLY AN EXPERIMENTAL VERSION FOR TESTING WHICH IS STILL NOT WORKING #
-#################################################################################
+param(
+    [Parameter(Mandatory=$true)]
+    [String]$NAVSERVER,
+    [Parameter(Mandatory=$true)]
+    [String]$NAVINSTANCE,
+    [Parameter(Mandatory=$true)]
+    [String]$NAVCLIENTPORT,
+    [Parameter(Mandatory=$true)]
+    [String]$NAVWEBINSTANCE
+)
+
+##############################################################################
+# THIS IS IMPROVED TESTING VERSION FOR TESTING WHICH SEEMS TO BE WORKING NOW #
+##############################################################################
 
 #Copy-Item 'C:\scripts\_SHARE\WebServerInstance.ps1' 'C:\install\content\DynamicsNavDvd\WebClient\Microsoft Dynamics NAV\100\Web Client\bin\'
 #& 'C:\install\content\scripts\Install-Msi.ps1' -MsiFullPath 'C:\install\content\DynamicsNavDvd\WebClient\Microsoft Dynamics NAV Web Client.msi'
 # 0ED65CB18D285E4EF3975AE2FCB55E693549709B
 
-$VerbosePreference = "continue"
+$certPath = 'C:\install\content\navcert.pfx'
+$thumbprint = (Get-PfxCertificate -FilePath $certPath).Thumbprint
+$certStoreLocation = 'Cert:\LocalMachine\Root'
 
-New-NAVWebServerInstance -ClientServicesCredentialType NavUserPassword -ClientServicesPort 7046 `
-  -DnsIdentity NAVSERVER -Server NAVSERVER -ServerInstance NAVSERVICE -WebServerInstance NAV01 -Verbose
+$navAdminToolFile = Get-ChildItem -Path $env:ProgramFiles -Filter NavAdminTool.ps1 -Recurse
+$navAdminToolFullName = $navAdminToolFile.FullName
 
-Import-PfxCertificate C:\install\content\navcert.pfx -CertStoreLocation Cert:\LocalMachine\Root -Verbose
+$verbosePreference = "SilentlyContinue"
+& $navAdminToolFullName
+$verbosePreference = "Continue"
 
-Get-Website -Verbose
-$websitename = 'Microsoft Dynamics NAV 2017 Web Client'
-New-WebBinding -Name $websitename -IPAddress * -Port 443 -Protocol https -Verbose
-$thumbprint = '0ED65CB18D285E4EF3975AE2FCB55E693549709B'
-$certificate = Get-Item cert:\localmachine\My\$thumbprint
-$certificate | New-Item "IIS:\SSLBindings\0.0.0.0!443" -Verbose
+$instance = Get-NAVWebServerInstance $NAVWEBINSTANCE
+if (($instance | Measure-Object).Count -lt 1) {
+
+  New-NAVWebServerInstance -ClientServicesCredentialType NavUserPassword -ClientServicesPort $NAVCLIENTPORT `
+    -DnsIdentity NAVSERVER -Server $NAVSERVER -ServerInstance $NAVINSTANCE -WebServerInstance $NAVWEBINSTANCE -Verbose
+
+  Import-PfxCertificate $certPath -CertStoreLocation $certStoreLocation -Verbose
+
+  $defaultNavWebSite = Get-Website '*Microsoft Dynamics NAV*Web Client*'
+  if (($defaultNavWebSite | Measure-Object).Count -eq 0) {
+    throw "Default Microsoft Dynamics NAV Web Client web site does not exist."
+  }
+
+  # TO-DO: Obtain $websitename dynamically.
+  $defaultNavWebSite = $defaultNavWebSite | Select-Object -First 1
+  $websitename = $defaultNavWebSite.Name
+  New-WebBinding -Name $websitename -IPAddress * -Port 443 -Protocol https -Verbose
+  $certificate = Get-Item ($certStoreLocation + '\' + $thumbprint)
+  $certificate | New-Item "IIS:\SSLBindings\0.0.0.0!443" -Verbose
+
+}
+
+$lastCheck = (Get-Date).AddSeconds(-2)
+
+Get-NetIPAddress | Format-Table
+Write-Verbose "NAV Web Server instance should be running..."
+
+Start-Process "C:\\install\\content\\bin\\ServiceMonitor.exe" -ArgumentList "w3svc" -Wait
+
+Write-Verbose "w3svc has been stopped, exiting..."

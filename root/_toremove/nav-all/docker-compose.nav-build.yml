@@ -1,0 +1,14 @@
+version: '3.0'
+services:
+    nav:
+        build: 
+            context: ..\nav
+            dockerfile: Dockerfile
+            args: 
+                NAV_VERSION: ${NAV_VERSION}
+    web:
+        build:
+            context: ..\nav-web
+            dockerfile: Dockerfile
+            args: 
+                NAV_VERSION: ${NAV_VERSION}
