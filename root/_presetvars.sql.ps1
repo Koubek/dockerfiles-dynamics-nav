@@ -1,5 +1,8 @@
 # TO-DO: Assign a version tag to reflect at least the current SQL image version.
-Remove-Item (Join-Path $PSScriptRoot '__imageversion.sql.txt')
+if (Test-Path (Join-Path $PSScriptRoot '__imageversion.sql.txt'))
+{
+    Remove-Item (Join-Path $PSScriptRoot '__imageversion.sql.txt')
+}
 'latest' > (Join-Path $PSScriptRoot '__imageversion.sql.txt')
 
 $repo = Get-Content (Join-Path $PSScriptRoot '__privatereponame.txt')

@@ -1,4 +1,7 @@
-Remove-Item (Join-Path $PSScriptRoot '__imageversion.nav.txt')
+if (Test-Path (Join-Path $PSScriptRoot '__imageversion.nav.txt'))
+{
+    Remove-Item (Join-Path $PSScriptRoot '__imageversion.nav.txt')
+}
 & (Join-Path $PSScriptRoot '__content\NAV\scripts\Get-NavVersion.ps1') (Join-Path $PSScriptRoot '__content_user\NAVDVD') > (Join-Path $PSScriptRoot '__imageversion.nav.txt')
 
 $versionArgSupported = [System.Version] $($(docker version --format '{{.Server.Version}}').SubString(0, 5)) -ge [System.Version] "17.05"
