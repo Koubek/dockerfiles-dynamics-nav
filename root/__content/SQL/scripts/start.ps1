@@ -69,7 +69,7 @@ if (($attach_dbs) -and ($attach_dbs -ne "")) {
 	}
 }
 
-.\Restore-SqlDatabases.ps1 -sql_server_instance 'localhost' -restore_dbs $restore_dbs -base_db_folder $base_db_folder `
+. (Join-Path $PSScriptRoot Restore-SqlDatabases.ps1) -sql_server_instance 'localhost' -restore_dbs $restore_dbs -base_db_folder $base_db_folder `
 	-use_hostname_folder $use_hostname_folder -sql_login_name 'sa' -sql_login_password $passwordSecureString
 
 $lastCheck = (Get-Date).AddSeconds(-2)
