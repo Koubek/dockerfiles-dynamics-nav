@@ -25,6 +25,8 @@ RUN powershell c:\install\content\Scripts\Add-MissingRegistry.ps1; \
 RUN powershell Import-Module c:\install\content\DynamicsNavDvd\NavInstallationTools.psm1 -Force; \
     Install-NAVComponent -ConfigFile c:\install\content\configs\Install-NavComponentConfig-web.xml
 
+RUN powershell Remove-Item -Recurse -Force 'C:\install\content\DynamicsNavDvd'
+
 # Expose the default IIS ports.
 EXPOSE 80 443
 
