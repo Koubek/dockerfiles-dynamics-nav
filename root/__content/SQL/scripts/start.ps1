@@ -20,7 +20,11 @@ param(
 
 	[Parameter(Mandatory=$false)]
 	[ValidateSet("true", "false")]
-	[string]$use_hostname_folder
+	[string]$use_hostname_folder,
+
+	[Parameter(Mandatory=$false)]
+	[ValidateSet("true", "false")]
+	[string]$use_log_loop = "true"
 )
 
 
@@ -72,12 +76,19 @@ if (($attach_dbs) -and ($attach_dbs -ne "")) {
 . (Join-Path $PSScriptRoot Restore-SqlDatabases.ps1) -sql_server_instance 'localhost' -restore_dbs $restore_dbs -base_db_folder $base_db_folder `
 	-use_hostname_folder $use_hostname_folder -sql_login_name 'sa' -sql_login_password $passwordSecureString
 
-$lastCheck = (Get-Date).AddSeconds(-2)
+if ($use_log_loop -eq $true) {
+	# This block is supposed to be the very last part of code that will be executed
+	# as the code will remain in the loop below.
+	# You should skip this block in case you need to do something else after this script
+	# and you also need to keep in mind that you will need to add your own loop to keep the container running!!!
 
-Get-NetIPAddress | Format-Table
+	$lastCheck = (Get-Date).AddSeconds(-2)
 
-while ($true) {
-    Get-EventLog -LogName Application -Source "MSSQL*" -After $lastCheck | Select-Object TimeGenerated, EntryType, Message
-    $lastCheck = Get-Date
-    Start-Sleep -Seconds 2
+	Get-NetIPAddress | Format-Table
+
+	while ($true) {
+		Get-EventLog -LogName Application -Source "MSSQL*" -After $lastCheck | Select-Object TimeGenerated, EntryType, Message
+		$lastCheck = Get-Date
+		Start-Sleep -Seconds 2
+	}
 }
