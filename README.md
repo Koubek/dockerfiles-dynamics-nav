@@ -29,7 +29,9 @@
     ![](media/DockerDemoRecording_01_cloneRepo.gif)
  * ## Copy NAV DVD content
     ![](media/DockerDemoRecording_02_copyNavDvd.gif)
- * ## Build Docker Images for Dynamics NAV
+ * ## Build Docker Images for Dynamics NAV (compressed, this will actually take some time to download missing layers and build the images)
     ![](media/DockerDemoRecording_03_buildDockerImages.gif)
+* ## List Dynamics NAV Docker Images that have been created
+    ![](media/DockerDemoRecording_04_showDockerImages.gif)
  * ## Run NAV via Docker
     * TO-DO!!! :)
