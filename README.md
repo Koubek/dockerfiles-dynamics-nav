@@ -23,3 +23,13 @@
 
 
  * #### The last group will reflect customers (end users) or situation when thinking about deployment in the production environment. There is nothing else to say but **DON\`T DO IT!!!** Microsoft does not provide MS Dynamics NAV with any kind of support when deployed via Docker. Of course, it`s a pity because our customer could benefit from, for example, running NAV on Docker Swarm (native cluster from Docker) and scale and balance NAV services dynamically.
+
+# DEMO
+ * ## Clone the repository content
+    ![](media/DockerDemoRecording_01_cloneRepo.gif)
+ * ## Copy NAV DVD content
+    ![](media/DockerDemoRecording_02_copyNavDvd.gif)
+ * ## Build Docker Images for Dynamics NAV
+    ![](media/DockerDemoRecording_03_buildDockerImages.gif)
+ * ## Run NAV via Docker
+    * TO-DO!!! :)
