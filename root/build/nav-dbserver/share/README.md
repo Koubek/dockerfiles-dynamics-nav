@@ -1,1 +1,0 @@
-Place MS Dynamics NAV native server installation files (*'Microsoft Dynamics NAV Classic Database Server.msi'* and all folders => usually *'program files'* and *'System32'*) here into this directory!!!

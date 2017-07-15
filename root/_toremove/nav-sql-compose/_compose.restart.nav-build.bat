@@ -1,1 +1,0 @@
-docker-compose -f docker-compose.yml -f docker-compose.nav-build.yml -f docker-compose.configs.yml restart

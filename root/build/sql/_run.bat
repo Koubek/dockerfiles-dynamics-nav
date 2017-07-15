@@ -1,1 +1,0 @@
-docker run -ti --rm -v %CD%\SQLDB:C:\SQLDB myprivaterepo/sql-for-nav powershell

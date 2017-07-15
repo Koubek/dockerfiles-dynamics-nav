@@ -1,4 +1,0 @@
-version: '2.1'
-services:
-    nav:
-        image: myprivaterepo/navservice:10.0.15140.0   # this image must be available/build it before!
