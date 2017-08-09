@@ -1,3 +1,15 @@
+# !!!IMPORTANT CHANGES!!!
+------
+### There is a [new repository provided by Microsoft](https://github.com/Microsoft/nav-docker) so all my (and Tobias\`s) effort is being targeted to help them with the testing and some changes, fixes etc. We are not able to work on the both versions simultaneously (also it has no sense right now) in our free time.
+
+# Thanks for understanding!!!
+
+------
+
+
+
+
+
 # Dockerfiles for MS Dynamics NAV
 [![Join the chat at https://gitter.im/dockerfiles-dynamics-nav/Lobby](https://badges.gitter.im/dockerfiles-dynamics-nav/Lobby.svg)](https://gitter.im/dockerfiles-dynamics-nav/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
